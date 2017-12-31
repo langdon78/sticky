@@ -48,21 +48,26 @@ public extension Persistable {
         if let cache = persistableCache?.stored, !updateCache {
             return cache as? [Self]
         } else {
-            let name = String(describing: Self.self)
-            let fileExt = ".json"
-            let filename = name + fileExt
-            guard let sourcePath = try? FileManager.default.url(for: .documentDirectory, in: .allDomainsMask, appropriateFor: nil, create: false) else { return nil }
-            let fullPath = sourcePath.appendingPathComponent(filename)
-            print(fullPath)
-            let manager = FileManager()
-            let data = manager.contents(atPath: fullPath.path)
-            if let jsonData = data {
-                let carObject = try? JSONDecoder().decode([Self].self, from: jsonData)
-                persistableCache?.stored = carObject
-                return carObject
-            }
-            return nil
+            return Self.decode(from: fileData)
         }
+    }
+    
+    public static var debugDescription: String {
+        guard let data = fileData else { return "" }
+        let objectName = String(describing: Self.self)
+        return "\(objectName): \(String(bytes: data, encoding: .utf8) ?? "")"
+    }
+    
+    private static func decode(from data: Data?) -> [Self]? {
+        guard let jsonData = data else { return nil }
+        let carObject = try? JSONDecoder().decode([Self].self, from: jsonData)
+        persistableCache?.stored = carObject
+        return carObject
+    }
+    
+    private static var fileData: Data? {
+        let path = FileHandler.fullPath(for: Self.self)
+        return FileHandler.read(from: path)
     }
 }
 
@@ -105,14 +110,18 @@ public extension Persistable where Self: Equatable {
 
 public extension Collection where Element: Persistable, Self: Codable {
     public func saveAll() {
-        let encodedData = try? JSONEncoder().encode(self)
-        let json = String(bytes: encodedData!, encoding: String.Encoding.utf8)
-        print(json!)
-        let name = String(describing: Element.self)
-        let fileExt = ".json"
-        let filename = name + fileExt
-        guard let sourcePath = try? FileManager.default.url(for: .documentDirectory, in: .allDomainsMask, appropriateFor: nil, create: false) else { return }
-        let fullPath = sourcePath.appendingPathComponent(filename)
-        try! encodedData?.write(to: URL(fileURLWithPath: fullPath.path))
+        guard let encodedData = encode(self) else { return }
+        let path = FileHandler.fullPath(for: Element.self)
+        FileHandler.write(data: encodedData, to: path)
+    }
+    
+    private func encode<T>(_ obj: T) -> Data? where T: Encodable {
+        var data: Data? = nil
+        do {
+            data = try JSONEncoder().encode(obj)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+        return data
     }
 }
