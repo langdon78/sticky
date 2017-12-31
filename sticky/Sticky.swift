@@ -14,6 +14,10 @@ public class Sticky {
     public static func configure(with config: StickyConfigurationSettings) {
         Sticky.shared.configurationSettings = config
     }
+    
+    private func clearContentsOfDirectory() {
+        
+    }
 }
 
 public enum StickyConfigurationSettings {

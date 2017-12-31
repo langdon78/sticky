@@ -29,4 +29,11 @@ internal class FileHandler {
             print(error.localizedDescription)
         }
     }
+    
+    internal static func clear() {
+        let urls = FileManager.default.contentsOfDirectory(at: localDirectory, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+        urls.forEach { url in
+            FileManager.default.removeItem(at: url)
+        }
+    }
 }
