@@ -100,7 +100,7 @@ public extension Persistable where Self: Equatable {
 public extension Collection where Element: Persistable, Self: Codable {
     public func saveAll() {
         guard let encodedData = try? JSONEncoder().encode(self) else { return }
-        let json = String(bytes: encodedData!, encoding: String.Encoding.utf8)
+        let json = String(bytes: encodedData, encoding: String.Encoding.utf8)
         print(json!)
         let path = FileHandler.fullPath(for: Element.self)
         FileHandler.write(data: encodedData, to: path)
