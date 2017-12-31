@@ -45,6 +45,7 @@ public extension Persistable {
     }
     
     public static func read(updateCache: Bool = false) -> [Self]? {
+        print(Sticky.shared.configuration.async)
         if let cache = persistableCache?.stored, !updateCache {
             return cache as? [Self]
         } else {

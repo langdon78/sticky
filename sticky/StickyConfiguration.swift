@@ -1,13 +1,15 @@
 import Foundation
 
-internal struct StickyConfiguration {
-    let localDirectory: URL
-    let preloadCache: Bool
-    let fileExtensionName: String
-    let clearDirectory: Bool
-    let async: Bool
+public let defaultFileExtension = ".json"
+
+public struct StickyConfiguration {
+    public let localDirectory: URL
+    public let preloadCache: Bool
+    public let fileExtensionName: String
+    public let clearDirectory: Bool
+    public let async: Bool
     
-    init(
+    public init(
         localDirectory: URL = try!
             FileManager.default.url(
                 for: .documentDirectory,
@@ -16,7 +18,7 @@ internal struct StickyConfiguration {
                 create: false
             ),
         preloadCache: Bool = true,
-        fileExtensionName: String = ".json",
+        fileExtensionName: String = defaultFileExtension,
         clearDirectory: Bool = false,
         async: Bool = false
         ) {
