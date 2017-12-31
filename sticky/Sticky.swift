@@ -5,7 +5,15 @@ public class Sticky {
     internal var configuration: StickyConfiguration {
         return configurationSettings.configuration
     }
-    private var configurationSettings: StickyConfigurationSettings
+    private var configurationSettings: StickyConfigurationSettings {
+        didSet {
+            if case .custom(let config) = configurationSettings {
+                if config.clearDirectory {
+                    clearContentsOfDirectory()
+                }
+            }
+        }
+    }
     
     private init(with configurationSettings: StickyConfigurationSettings = .default) {
         self.configurationSettings = configurationSettings
@@ -16,7 +24,7 @@ public class Sticky {
     }
     
     private func clearContentsOfDirectory() {
-        
+        FileHandler.clear()
     }
 }
 

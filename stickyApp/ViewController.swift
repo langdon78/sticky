@@ -30,7 +30,7 @@ class ViewController: UIViewController {
 //        let colleges = [bradley, uofi]
 //
 
-        bradley.save()
+        [bradley].saveAll()
         print(College.debugDescription)
         // Do any additional setup after loading the view, typically from a nib.
     }

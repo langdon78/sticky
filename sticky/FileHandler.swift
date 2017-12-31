@@ -31,9 +31,17 @@ internal class FileHandler {
     }
     
     internal static func clear() {
-        let urls = FileManager.default.contentsOfDirectory(at: localDirectory, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-        urls.forEach { url in
-            FileManager.default.removeItem(at: url)
+        do {
+            let urls = try FileManager.default.contentsOfDirectory(at: localDirectory, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            urls.forEach { url in
+                do {
+                    try FileManager.default.removeItem(at: url)
+                } catch {
+                    print(error.localizedDescription)
+                }
+            }
+        } catch {
+            print(error.localizedDescription)
         }
     }
 }
