@@ -1,15 +1,15 @@
 //
-//  stickyTests.swift
-//  stickyTests
+//  StickyTests.swift
+//  StickyTests
 //
 //  Created by James Langdon on 12/31/17.
 //  Copyright © 2017 James Langdon. All rights reserved.
 //
 
 import XCTest
-@testable import sticky
+@testable import Sticky
 
-class stickyTests: XCTestCase {
+class StickyTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
