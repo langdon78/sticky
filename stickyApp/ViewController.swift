@@ -24,14 +24,14 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let bradley = College(name: "Illinois State University")
-        let uofi = College(name: "University of Illinois")
+//        let bradley = College(name: "Illinois State University")
+//        let uofi = College(name: "University of Illinois")
+//
+//        let colleges = [bradley, uofi]
+//
 
-        let colleges = [bradley, uofi]
-
-
-        bradley.replace(with: College(name: "DUke"))
-        College.read()?.map { print($0.name) }
+//        bradley.replace(with: College(name: "DUke"))
+        College.read()?.forEach { print($0.name) }
         // Do any additional setup after loading the view, typically from a nib.
     }
 

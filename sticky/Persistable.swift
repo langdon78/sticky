@@ -48,14 +48,8 @@ public extension Persistable {
         if let cache = persistableCache?.stored, !updateCache {
             return cache as? [Self]
         } else {
-            let name = String(describing: Self.self)
-            let fileExt = ".json"
-            let filename = name + fileExt
-            guard let sourcePath = try? FileManager.default.url(for: .documentDirectory, in: .allDomainsMask, appropriateFor: nil, create: false) else { return nil }
-            let fullPath = sourcePath.appendingPathComponent(filename)
-            print(fullPath)
-            let manager = FileManager()
-            let data = manager.contents(atPath: fullPath.path)
+            let path = FileHandler.fullPath(for: Self.self)
+            let data = FileHandler.read(from: path)
             if let jsonData = data {
                 let carObject = try? JSONDecoder().decode([Self].self, from: jsonData)
                 persistableCache?.stored = carObject
@@ -105,14 +99,10 @@ public extension Persistable where Self: Equatable {
 
 public extension Collection where Element: Persistable, Self: Codable {
     public func saveAll() {
-        let encodedData = try? JSONEncoder().encode(self)
+        guard let encodedData = try? JSONEncoder().encode(self) else { return }
         let json = String(bytes: encodedData!, encoding: String.Encoding.utf8)
         print(json!)
-        let name = String(describing: Element.self)
-        let fileExt = ".json"
-        let filename = name + fileExt
-        guard let sourcePath = try? FileManager.default.url(for: .documentDirectory, in: .allDomainsMask, appropriateFor: nil, create: false) else { return }
-        let fullPath = sourcePath.appendingPathComponent(filename)
-        try! encodedData?.write(to: URL(fileURLWithPath: fullPath.path))
+        let path = FileHandler.fullPath(for: Element.self)
+        FileHandler.write(data: encodedData, to: path)
     }
 }
