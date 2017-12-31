@@ -9,12 +9,8 @@
 import UIKit
 import Sticky
 
-class College: Persistable {
+struct College: Persistable {
     var name: String
-    
-    init(name: String) {
-        self.name = name
-    }
 }
 
 extension College: Equatable {
