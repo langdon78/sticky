@@ -1,11 +1,3 @@
-//
-//  ViewController.swift
-//  stickyApp
-//
-//  Created by James Langdon on 12/31/17.
-//  Copyright © 2017 James Langdon. All rights reserved.
-//
-
 import UIKit
 import Sticky
 
@@ -71,8 +63,9 @@ class ViewController: UIViewController {
         )
         
         var college = College(name: "Colorado", ranking: 13)
-        college.ranking = 29
-        college.insertIfNew()
+        college.ranking = 30
+        college.save()
+        College.dumpDataStoreToLog()
         
         let country = Country(name: "Japan")
         country.insertIfNew()

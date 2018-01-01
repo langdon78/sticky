@@ -12,14 +12,27 @@ public typealias Stickyable = Persistable & Equatable & UniqueIndexable
 public extension Persistable {
     
     public static func read() -> [Self]? {
-        stickyLog(debugDescription)
         return Self.decode(from: fileData)
     }
     
     public static func readAsync(completion: @escaping ([Self]?) -> Void) {
-        stickyLog(debugDescription)
         DispatchQueue.main.async {
             completion(Self.decode(from: fileData))
+        }
+    }
+    
+    public static func dumpDataStoreToLog() {
+        if Sticky.shared.configuration.logging {
+            if Sticky.shared.configuration.async {
+                DispatchQueue.main.async {
+                    guard let data = fileData else { return }
+                    stickyLog("\(name): \(String(bytes: data, encoding: .utf8) ?? "")")
+                }
+            } else {
+                stickyLog(debugDescription)
+            }
+        } else {
+            print("\(name).\(#function) - Please enable logging in StickyConfiguration to see stored data")
         }
     }
     
@@ -46,7 +59,7 @@ public extension Persistable {
         return nil
     }
     
-    public static var debugDescription: String {
+    private static var debugDescription: String {
         guard let data = fileData else { return "" }
         return "\(name): \(String(bytes: data, encoding: .utf8) ?? "")"
     }
