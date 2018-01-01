@@ -1,5 +1,13 @@
 import Foundation
 
+public func stickyLog(_ content: Any) {
+    if Sticky.shared.configuration.logging {
+        if let message = content as? String {
+            NSLog("sticky_log_output:  \(message)")
+        }
+    }
+}
+
 public class Sticky {
     public static let shared = Sticky()
     
@@ -15,6 +23,7 @@ public class Sticky {
                     clearContentsOfDirectory()
                 }
             }
+            stickyLog("PATH= \(Sticky.shared.configuration.localDirectory.path)")
         }
     }
     
@@ -45,7 +54,8 @@ public enum StickyConfigurationSettings {
                 preloadCache: configuration.preloadCache,
                 fileExtensionName: configuration.fileExtensionName,
                 clearDirectory: configuration.clearDirectory,
-                async: configuration.async
+                async: configuration.async,
+                logging: configuration.logging
             )
         }
     }

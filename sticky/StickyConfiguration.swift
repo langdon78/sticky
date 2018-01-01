@@ -8,6 +8,7 @@ public struct StickyConfiguration {
     public let fileExtensionName: String
     public let clearDirectory: Bool
     public let async: Bool
+    public let logging: Bool
     
     public init(
         localDirectory: URL = try!
@@ -20,12 +21,14 @@ public struct StickyConfiguration {
         preloadCache: Bool = true,
         fileExtensionName: String = defaultFileExtension,
         clearDirectory: Bool = false,
-        async: Bool = false
+        async: Bool = false,
+        logging: Bool = false
         ) {
         self.localDirectory = localDirectory
         self.preloadCache = preloadCache
         self.fileExtensionName = fileExtensionName
         self.clearDirectory = clearDirectory
         self.async = async
+        self.logging = logging
     }
 }

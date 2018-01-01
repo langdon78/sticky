@@ -88,18 +88,19 @@ internal class Store<T: Persistable & Equatable>: Savable {
         switch action {
         case .insert:
             stored?.append(value)
-            print("\(value) inserted")
+            stickyLog("\(value) inserted")
             notify(from: .stickyInsert, with: [action: [value]])
         case .update(let index):
-            print("\(stored![index]) updated to \(value)")
-            let oldValue = stored?[index]
+            guard let oldValue = stored?[index] else { return }
             stored?[index] = value
+            stickyLog("\(oldValue) updated to \(value)")
             notify(from: .stickyUpdate, with: [action: [oldValue,value]])
         case .create:
             stored?.saveWithOverwrite()
             notify(from: .stickyCreate, with: [action: [value]])
+            stickyLog("Created new file for \(value))")
         default:
-            print("\(Object.name): No action taken")
+            stickyLog("\(Object.name): No action taken")
         }
         stored?.saveWithOverwrite()
     }
