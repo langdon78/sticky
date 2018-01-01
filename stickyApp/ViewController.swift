@@ -46,25 +46,60 @@ extension Country: Equatable {
 }
 
 class ViewController: UIViewController {
-
+    @IBOutlet weak var notifcationLabel: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        guard let collegeNotification = College.notificationName else { return }
+        print(College.notificationName!.rawValue)
         
-        let college = College(name: "USC", ranking: 25)
-//        let uofi = College(name: "University of Illinois")
-//
-//        let colleges = [bradley, uofi]
-//
+        NotificationCenter.stickyInsert.addObserver(
+            self,
+            selector: #selector(updateLabel(notification:)),
+            name: collegeNotification,
+            object: nil
+        )
+        NotificationCenter.stickyUpdate.addObserver(
+            self,
+            selector: #selector(updateLabel(notification:)),
+            name: collegeNotification,
+            object: nil
+        )
+        
+        let college = College(name: "Colorado", ranking: 18)
 
         college.save()
         
-        let country = Country(name: "Canada")
+        let country = Country(name: "Ireland")
         country.save()
         print(College.debugDescription)
         print(College.filePath)
     }
 
+    @objc func updateLabel(notification: NSNotification) {
+        guard
+            let first = notification.userInfo?.first,
+            let key = first.key.base as? Action
+            else { return }
 
+        let value = first.value
+        
+        switch (key, value) {
+        case (.insert, let change):
+            guard let college = change as? College else { return }
+            notifcationLabel.text = "Inserted \(college.name)"
+        case (.update, let change):
+            print("update")
+            guard let college = change as? [College], let oldValue = college.first, let newValue = college.last else { return }
+            notifcationLabel.text = "\(String(describing: oldValue.ranking!) ) updated to \(String(describing: newValue.ranking!))"
+        case (.create, let change):
+            guard let college = change as? College else { return }
+            notifcationLabel.text = "Created new data set: \(college.name)"
+        default:
+            print("Not known")
+        }
+
+    }
 
 }
 

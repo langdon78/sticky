@@ -19,7 +19,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let stickyConfig = StickyConfiguration(async: false)
         Sticky.configure(with: .custom(stickyConfig))
-
+        College.registerForNotification()
+        
         return true
     }
 }
