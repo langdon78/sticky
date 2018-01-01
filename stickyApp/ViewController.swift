@@ -66,8 +66,8 @@ class ViewController: UIViewController {
             object: nil
         )
         
-        let college = College(name: "Colorado", ranking: 18)
-
+        var college = College(name: "Colorado", ranking: 11)
+        college.ranking = 17
         college.save()
         
         let country = Country(name: "Ireland")
@@ -79,27 +79,21 @@ class ViewController: UIViewController {
     @objc func updateLabel(notification: NSNotification) {
         guard
             let first = notification.userInfo?.first,
-            let key = first.key.base as? Action
+            let key = first.key.base as? Action,
+            let value = first.value as? [College],
+            let college = value.first
             else { return }
-
-        let value = first.value
+        let newValue = value.last
         
-        switch (key, value) {
-        case (.insert, let change):
-            guard let college = change as? College else { return }
+        switch key {
+        case .insert:
             notifcationLabel.text = "Inserted \(college.name)"
-        case (.update, let change):
-            print("update")
-            guard let college = change as? [College], let oldValue = college.first, let newValue = college.last else { return }
-            notifcationLabel.text = "\(String(describing: oldValue.ranking!) ) updated to \(String(describing: newValue.ranking!))"
-        case (.create, let change):
-            guard let college = change as? College else { return }
+        case .update:
+            notifcationLabel.text = "\(String(describing: college.ranking!) ) updated to \(String(describing: newValue!.ranking!))"
+        case .create:
             notifcationLabel.text = "Created new data set: \(college.name)"
         default:
             print("Not known")
         }
-
     }
-
 }
-
