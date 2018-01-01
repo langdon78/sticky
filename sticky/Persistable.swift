@@ -70,7 +70,8 @@ public extension Persistable {
         do {
             decoded = try JSONDecoder().decode([Self].self, from: jsonData)
         } catch {
-            print(error.localizedDescription)
+            print("ERROR: \(name).\(#function) \(error.localizedDescription) Make sure any new data properties are marked as optional.")
+            fatalError()
         }
         return decoded
     }
@@ -157,7 +158,7 @@ internal extension Collection where Element: Persistable, Self: Codable {
         do {
             data = try JSONEncoder().encode(obj)
         } catch let error {
-            print(error.localizedDescription)
+            print("ERROR: \(error.localizedDescription)")
         }
         return data
     }

@@ -4,6 +4,7 @@ import Sticky
 struct College: Persistable {
     var name: String
     var ranking: Int?
+    var city: String?
 }
 
 extension College: Equatable {
@@ -62,8 +63,7 @@ class ViewController: UIViewController {
             object: nil
         )
         
-        var college = College(name: "Colorado", ranking: 13)
-        college.ranking = 30
+        let college = College(name: "Idaho", ranking: 43, city: "Boise")
         college.save()
         College.dumpDataStoreToLog()
         
@@ -84,7 +84,7 @@ class ViewController: UIViewController {
         case .insert:
             notifcationLabel.text = "Inserted \(college.name)"
         case .update:
-            notifcationLabel.text = "\(String(describing: college.ranking!) ) updated to \(String(describing: newValue!.ranking!))"
+            notifcationLabel.text = "\(String(describing: college.ranking) ) updated to \(String(describing: newValue!.ranking))"
         case .create:
             notifcationLabel.text = "Created new data set: \(college.name)"
         default:
