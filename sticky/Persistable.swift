@@ -9,16 +9,40 @@ public protocol UniqueIndexable {
 
 public typealias Stickyable = Persistable & Equatable & UniqueIndexable
 
+internal var registeredNotifications: [Persistable.Type] = []
+
 public extension Persistable {
     
     public static func read(updateCache: Bool = false) -> [Self]? {
         return Self.decode(from: fileData)
     }
     
+    public static var name: String {
+        return String(describing: Self.self)
+    }
+    
+    public static func registerForNotification() {
+        if notificationName == nil {
+            registeredNotifications.append(Self.self)
+        }
+    }
+    
+    public static func deregisterForNotification() {
+        if let index = registeredNotifications.index(where: { $0 == Self.self} ) {
+            registeredNotifications.remove(at: index)
+        }
+    }
+    
+    public static var notificationName: NSNotification.Name? {
+        if registeredNotifications.contains(where: { $0 == Self.self }) {
+            return NSNotification.Name(name)
+        }
+        return nil
+    }
+    
     public static var debugDescription: String {
         guard let data = fileData else { return "" }
-        let objectName = String(describing: Self.self)
-        return "\(objectName): \(String(bytes: data, encoding: .utf8) ?? "")"
+        return "\(name): \(String(bytes: data, encoding: .utf8) ?? "")"
     }
     
     private static func decode(from data: Data?) -> [Self]? {
