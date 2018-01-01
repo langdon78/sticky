@@ -46,25 +46,54 @@ extension Country: Equatable {
 }
 
 class ViewController: UIViewController {
-
+    @IBOutlet weak var notifcationLabel: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        guard let collegeNotification = College.notificationName else { return }
+        print(College.notificationName!.rawValue)
         
-        let college = College(name: "USC", ranking: 19)
-//        let uofi = College(name: "University of Illinois")
-//
-//        let colleges = [bradley, uofi]
-//
-
+        NotificationCenter.stickyInsert.addObserver(
+            self,
+            selector: #selector(updateLabel(notification:)),
+            name: collegeNotification,
+            object: nil
+        )
+        NotificationCenter.stickyUpdate.addObserver(
+            self,
+            selector: #selector(updateLabel(notification:)),
+            name: collegeNotification,
+            object: nil
+        )
+        
+        var college = College(name: "Colorado", ranking: 11)
+        college.ranking = 17
         college.save()
         
-        let country = Country(name: "Canada")
+        let country = Country(name: "Ireland")
         country.save()
         print(College.debugDescription)
         print(College.filePath)
     }
 
-
-
+    @objc func updateLabel(notification: NSNotification) {
+        guard
+            let first = notification.userInfo?.first,
+            let key = first.key.base as? Action,
+            let value = first.value as? [College],
+            let college = value.first
+            else { return }
+        let newValue = value.last
+        
+        switch key {
+        case .insert:
+            notifcationLabel.text = "Inserted \(college.name)"
+        case .update:
+            notifcationLabel.text = "\(String(describing: college.ranking!) ) updated to \(String(describing: newValue!.ranking!))"
+        case .create:
+            notifcationLabel.text = "Created new data set: \(college.name)"
+        default:
+            print("Not known")
+        }
+    }
 }
-

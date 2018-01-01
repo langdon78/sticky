@@ -15,10 +15,32 @@ public extension Persistable {
         return Self.decode(from: fileData)
     }
     
+    public static var name: String {
+        return String(describing: Self.self)
+    }
+    
+    public static func registerForNotification() {
+        if notificationName == nil {
+            Sticky.shared.registeredNotifications.append(Self.self)
+        }
+    }
+    
+    public static func deregisterForNotification() {
+        if let index = Sticky.shared.registeredNotifications.index(where: { $0 == Self.self} ) {
+            Sticky.shared.registeredNotifications.remove(at: index)
+        }
+    }
+    
+    public static var notificationName: NSNotification.Name? {
+        if Sticky.shared.registeredNotifications.contains(where: { $0 == Self.self }) {
+            return NSNotification.Name(name)
+        }
+        return nil
+    }
+    
     public static var debugDescription: String {
         guard let data = fileData else { return "" }
-        let objectName = String(describing: Self.self)
-        return "\(objectName): \(String(bytes: data, encoding: .utf8) ?? "")"
+        return "\(name): \(String(bytes: data, encoding: .utf8) ?? "")"
     }
     
     private static func decode(from data: Data?) -> [Self]? {
@@ -55,6 +77,7 @@ public extension Persistable where Self: Equatable {
     }
     
     public func save() {
+        print("without index")
         save(in: self.store)
     }
     
@@ -70,6 +93,7 @@ public extension Persistable where Self: Equatable & UniqueIndexable {
     }
     
     public func save() {
+        print("with index")
         save(in: self.indexStore)
     }
 }
