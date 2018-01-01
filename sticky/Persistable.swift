@@ -11,9 +11,16 @@ public typealias Stickyable = Persistable & Equatable & UniqueIndexable
 
 public extension Persistable {
     
-    public static func read(updateCache: Bool = false) -> [Self]? {
+    public static func read() -> [Self]? {
         stickyLog(debugDescription)
         return Self.decode(from: fileData)
+    }
+    
+    public static func readAsync(completion: @escaping ([Self]?) -> Void) {
+        stickyLog(debugDescription)
+        DispatchQueue.main.async {
+            completion(Self.decode(from: fileData))
+        }
     }
     
     public static var name: String {
@@ -70,6 +77,12 @@ public extension Persistable where Self: Equatable {
         return Store(value: self, stored: objects)
     }
     
+    private func storeAsync(completion: @escaping (Store<Self>) -> Void) {
+        Self.readAsync { result in
+            completion(Store(value: self, stored: result))
+        }
+    }
+    
     public var isStored: Bool {
         if let _ = Self.read()?.index(of: self) {
             return true
@@ -79,7 +92,13 @@ public extension Persistable where Self: Equatable {
     
     public func save() {
         stickyLog("\(Self.name) saving without index")
-        save(in: self.store)
+        if Sticky.shared.configuration.async {
+            storeAsync { store in
+                self.save(in: store)
+            }
+        } else {
+            save(in: self.store)
+        }
     }
     
     fileprivate func save(in store: Store<Self>) {
@@ -93,9 +112,21 @@ public extension Persistable where Self: Equatable & UniqueIndexable {
         return IndexStore(value: self, stored: objects)
     }
     
+    private func indexStoreAsync(completion: @escaping (IndexStore<Self>) -> Void) {
+        Self.readAsync { result in
+            completion(IndexStore(value: self, stored: result))
+        }
+    }
+    
     public func save() {
         stickyLog("\(Self.name) saving with index")
-        save(in: self.indexStore)
+        if Sticky.shared.configuration.async {
+            indexStoreAsync { store in
+                self.save(in: store)
+            }
+        } else {
+            save(in: self.indexStore)
+        }
     }
 }
 
@@ -103,7 +134,9 @@ internal extension Collection where Element: Persistable, Self: Codable {
     internal func saveWithOverwrite() {
         guard let encodedData = encode(self) else { return }
         let path = FileHandler.fullPath(for: Element.self)
-        FileHandler.write(data: encodedData, to: path)
+        DispatchQueue.main.async {
+            FileHandler.write(data: encodedData, to: path)
+        }
     }
     
     private func encode<T>(_ obj: T) -> Data? where T: Encodable {
