@@ -1,17 +1,10 @@
-//
-//  ViewController.swift
-//  stickyApp
-//
-//  Created by James Langdon on 12/31/17.
-//  Copyright © 2017 James Langdon. All rights reserved.
-//
-
 import UIKit
 import Sticky
 
 struct College: Persistable {
     var name: String
     var ranking: Int?
+    var city: String?
 }
 
 extension College: Equatable {
@@ -45,6 +38,11 @@ extension Country: Equatable {
     }
 }
 
+struct Town {
+    var name: String
+    var population: Int
+}
+
 class ViewController: UIViewController {
     @IBOutlet weak var notifcationLabel: UILabel!
     
@@ -65,12 +63,12 @@ class ViewController: UIViewController {
             object: nil
         )
         
-        var college = College(name: "Colorado", ranking: 11)
-        college.ranking = 17
+        let college = College(name: "Idaho", ranking: 43, city: "Boise")
         college.save()
+        College.dumpDataStoreToLog()
         
-        let country = Country(name: "Ireland")
-        country.save()
+        let country = Country(name: "Japan")
+        country.insertIfNew()
     }
 
     @objc func updateLabel(notification: NSNotification) {
@@ -86,7 +84,7 @@ class ViewController: UIViewController {
         case .insert:
             notifcationLabel.text = "Inserted \(college.name)"
         case .update:
-            notifcationLabel.text = "\(String(describing: college.ranking!) ) updated to \(String(describing: newValue!.ranking!))"
+            notifcationLabel.text = "\(String(describing: college.ranking) ) updated to \(String(describing: newValue!.ranking))"
         case .create:
             notifcationLabel.text = "Created new data set: \(college.name)"
         default:

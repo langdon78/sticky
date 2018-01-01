@@ -11,9 +11,29 @@ public typealias Stickyable = Persistable & Equatable & UniqueIndexable
 
 public extension Persistable {
     
-    public static func read(updateCache: Bool = false) -> [Self]? {
-        stickyLog(debugDescription)
+    public static func read() -> [Self]? {
         return Self.decode(from: fileData)
+    }
+    
+    public static func readAsync(completion: @escaping ([Self]?) -> Void) {
+        DispatchQueue.main.async {
+            completion(Self.decode(from: fileData))
+        }
+    }
+    
+    public static func dumpDataStoreToLog() {
+        if Sticky.shared.configuration.logging {
+            if Sticky.shared.configuration.async {
+                DispatchQueue.main.async {
+                    guard let data = fileData else { return }
+                    stickyLog("\(name): \(String(bytes: data, encoding: .utf8) ?? "")")
+                }
+            } else {
+                stickyLog(debugDescription)
+            }
+        } else {
+            print("\(name).\(#function) - Please enable logging in StickyConfiguration to see stored data")
+        }
     }
     
     public static var name: String {
@@ -39,7 +59,7 @@ public extension Persistable {
         return nil
     }
     
-    public static var debugDescription: String {
+    private static var debugDescription: String {
         guard let data = fileData else { return "" }
         return "\(name): \(String(bytes: data, encoding: .utf8) ?? "")"
     }
@@ -50,7 +70,8 @@ public extension Persistable {
         do {
             decoded = try JSONDecoder().decode([Self].self, from: jsonData)
         } catch {
-            print(error.localizedDescription)
+            print("ERROR: \(name).\(#function) \(error.localizedDescription) Make sure any new data properties are marked as optional.")
+            fatalError()
         }
         return decoded
     }
@@ -70,6 +91,12 @@ public extension Persistable where Self: Equatable {
         return Store(value: self, stored: objects)
     }
     
+    private func storeAsync(completion: @escaping (Store<Self>) -> Void) {
+        Self.readAsync { result in
+            completion(Store(value: self, stored: result))
+        }
+    }
+    
     public var isStored: Bool {
         if let _ = Self.read()?.index(of: self) {
             return true
@@ -77,9 +104,15 @@ public extension Persistable where Self: Equatable {
         return false
     }
     
-    public func save() {
+    public func insertIfNew() {
         stickyLog("\(Self.name) saving without index")
-        save(in: self.store)
+        if Sticky.shared.configuration.async {
+            storeAsync { store in
+                self.save(in: store)
+            }
+        } else {
+            save(in: self.store)
+        }
     }
     
     fileprivate func save(in store: Store<Self>) {
@@ -93,9 +126,21 @@ public extension Persistable where Self: Equatable & UniqueIndexable {
         return IndexStore(value: self, stored: objects)
     }
     
+    private func indexStoreAsync(completion: @escaping (IndexStore<Self>) -> Void) {
+        Self.readAsync { result in
+            completion(IndexStore(value: self, stored: result))
+        }
+    }
+    
     public func save() {
         stickyLog("\(Self.name) saving with index")
-        save(in: self.indexStore)
+        if Sticky.shared.configuration.async {
+            indexStoreAsync { store in
+                self.save(in: store)
+            }
+        } else {
+            save(in: self.indexStore)
+        }
     }
 }
 
@@ -103,7 +148,9 @@ internal extension Collection where Element: Persistable, Self: Codable {
     internal func saveWithOverwrite() {
         guard let encodedData = encode(self) else { return }
         let path = FileHandler.fullPath(for: Element.self)
-        FileHandler.write(data: encodedData, to: path)
+        DispatchQueue.main.async {
+            FileHandler.write(data: encodedData, to: path)
+        }
     }
     
     private func encode<T>(_ obj: T) -> Data? where T: Encodable {
@@ -111,7 +158,7 @@ internal extension Collection where Element: Persistable, Self: Codable {
         do {
             data = try JSONEncoder().encode(obj)
         } catch let error {
-            print(error.localizedDescription)
+            print("ERROR: \(error.localizedDescription)")
         }
         return data
     }
