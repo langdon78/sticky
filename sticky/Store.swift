@@ -1,11 +1,11 @@
 import Foundation
 
-protocol Savable {
+internal protocol Savable {
     associatedtype Object: Persistable
     func save()
 }
 
-enum Action {
+fileprivate enum Action {
     case insert
     case update(Int)
     case create
@@ -13,7 +13,7 @@ enum Action {
     case none
 }
 
-class Store<T: Persistable & Equatable>: Savable {
+internal class Store<T: Persistable & Equatable>: Savable {
     typealias Object = T
     
     private var value: Object
@@ -61,7 +61,7 @@ class Store<T: Persistable & Equatable>: Savable {
     }
 }
 
-class IndexStore<T: Stickyable>: Store<T> {
+internal class IndexStore<T: Stickyable>: Store<T> {
     typealias Object = T
     
     var objectIndex: Object.Index
