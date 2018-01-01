@@ -55,6 +55,7 @@ public extension Persistable where Self: Equatable {
     }
     
     public func save() {
+        print("without index")
         save(in: self.store)
     }
     
@@ -70,6 +71,7 @@ public extension Persistable where Self: Equatable & UniqueIndexable {
     }
     
     public func save() {
+        print("with index")
         save(in: self.indexStore)
     }
 }

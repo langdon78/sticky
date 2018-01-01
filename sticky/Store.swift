@@ -51,13 +51,16 @@ internal class Store<T: Persistable & Equatable>: Savable {
         switch action {
         case .insert:
             stored?.append(value)
+            print("\(value) inserted")
         case .update(let index):
+            print("\(stored![index]) updated to \(value)")
             stored?[index] = value
         case .create:
             stored?.saveWithOverwrite()
         default:
             print("\(String(describing: Object.self)): No action taken")
         }
+        stored?.saveWithOverwrite()
     }
 }
 

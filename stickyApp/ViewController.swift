@@ -50,7 +50,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let college = College(name: "USC", ranking: 19)
+        let college = College(name: "USC", ranking: 25)
 //        let uofi = College(name: "University of Illinois")
 //
 //        let colleges = [bradley, uofi]
