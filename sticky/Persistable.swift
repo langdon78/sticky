@@ -9,8 +9,6 @@ public protocol UniqueIndexable {
 
 public typealias Stickyable = Persistable & Equatable & UniqueIndexable
 
-internal var registeredNotifications: [Persistable.Type] = []
-
 public extension Persistable {
     
     public static func read(updateCache: Bool = false) -> [Self]? {
@@ -23,18 +21,18 @@ public extension Persistable {
     
     public static func registerForNotification() {
         if notificationName == nil {
-            registeredNotifications.append(Self.self)
+            Sticky.shared.registeredNotifications.append(Self.self)
         }
     }
     
     public static func deregisterForNotification() {
-        if let index = registeredNotifications.index(where: { $0 == Self.self} ) {
-            registeredNotifications.remove(at: index)
+        if let index = Sticky.shared.registeredNotifications.index(where: { $0 == Self.self} ) {
+            Sticky.shared.registeredNotifications.remove(at: index)
         }
     }
     
     public static var notificationName: NSNotification.Name? {
-        if registeredNotifications.contains(where: { $0 == Self.self }) {
+        if Sticky.shared.registeredNotifications.contains(where: { $0 == Self.self }) {
             return NSNotification.Name(name)
         }
         return nil

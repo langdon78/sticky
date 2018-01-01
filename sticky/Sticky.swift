@@ -2,6 +2,9 @@ import Foundation
 
 public class Sticky {
     public static let shared = Sticky()
+    
+    internal var registeredNotifications: [Persistable.Type] = []
+    
     internal var configuration: StickyConfiguration {
         return configurationSettings.configuration
     }
