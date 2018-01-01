@@ -51,7 +51,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         guard let collegeNotification = College.notificationName else { return }
-        print(College.notificationName!.rawValue)
         
         NotificationCenter.stickyInsert.addObserver(
             self,
@@ -72,8 +71,6 @@ class ViewController: UIViewController {
         
         let country = Country(name: "Ireland")
         country.save()
-        print(College.debugDescription)
-        print(College.filePath)
     }
 
     @objc func updateLabel(notification: NSNotification) {

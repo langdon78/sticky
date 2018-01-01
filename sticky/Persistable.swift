@@ -12,6 +12,7 @@ public typealias Stickyable = Persistable & Equatable & UniqueIndexable
 public extension Persistable {
     
     public static func read(updateCache: Bool = false) -> [Self]? {
+        stickyLog(debugDescription)
         return Self.decode(from: fileData)
     }
     
@@ -77,7 +78,7 @@ public extension Persistable where Self: Equatable {
     }
     
     public func save() {
-        print("without index")
+        stickyLog("\(Self.name) saving without index")
         save(in: self.store)
     }
     
@@ -93,7 +94,7 @@ public extension Persistable where Self: Equatable & UniqueIndexable {
     }
     
     public func save() {
-        print("with index")
+        stickyLog("\(Self.name) saving with index")
         save(in: self.indexStore)
     }
 }
