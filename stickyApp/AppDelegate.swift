@@ -17,11 +17,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        let stickyConfig = StickyConfiguration(async: false, logging: true)
+        let stickyConfig = StickyConfiguration(async: true, logging: true)
         Sticky.configure(with: .custom(stickyConfig))
         College.registerForNotification()
         
         return true
     }
 }
-

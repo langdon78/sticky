@@ -65,11 +65,11 @@ class ViewController: UIViewController {
             object: nil
         )
         
-        var college = College(name: "Colorado", ranking: 11)
-        college.ranking = 17
+        var college = College(name: "Colorado", ranking: 13)
+        college.ranking = 28
         college.save()
         
-        let country = Country(name: "Ireland")
+        let country = Country(name: "Japan")
         country.save()
     }
 
