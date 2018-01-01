@@ -90,7 +90,7 @@ public extension Persistable where Self: Equatable {
         return false
     }
     
-    public func save() {
+    public func insertIfNew() {
         stickyLog("\(Self.name) saving without index")
         if Sticky.shared.configuration.async {
             storeAsync { store in

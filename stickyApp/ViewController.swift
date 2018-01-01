@@ -45,6 +45,11 @@ extension Country: Equatable {
     }
 }
 
+struct Town {
+    var name: String
+    var population: Int
+}
+
 class ViewController: UIViewController {
     @IBOutlet weak var notifcationLabel: UILabel!
     
@@ -66,11 +71,11 @@ class ViewController: UIViewController {
         )
         
         var college = College(name: "Colorado", ranking: 13)
-        college.ranking = 28
-        college.save()
+        college.ranking = 29
+        college.insertIfNew()
         
         let country = Country(name: "Japan")
-        country.save()
+        country.insertIfNew()
     }
 
     @objc func updateLabel(notification: NSNotification) {
