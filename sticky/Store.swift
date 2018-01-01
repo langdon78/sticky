@@ -5,12 +5,49 @@ internal protocol Savable {
     func save()
 }
 
-fileprivate enum Action {
+public extension NotificationCenter {
+    static let stickyInsert = NotificationCenter()
+    static let stickyUpdate = NotificationCenter()
+    static let stickyCreate = NotificationCenter()
+    static let stickyDelete = NotificationCenter()
+}
+
+public enum Action {
     case insert
     case update(Int)
     case create
     case delete
     case none
+}
+
+extension Action: Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .insert: return 0
+        case .create: return 1
+        case .delete: return 2
+        case .update: return 3
+        case .none: return 4
+        }
+    }
+}
+
+extension Action: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .insert: return "Insert"
+        case .create: return "Create"
+        case .delete: return "Delete"
+        case .update: return "Update"
+        case .none: return "No Action"
+        }
+    }
+}
+
+extension Action: Equatable {
+    public static func ==(lhs: Action, rhs: Action) -> Bool {
+        return lhs.hashValue == rhs.hashValue
+    }
 }
 
 internal class Store<T: Persistable & Equatable>: Savable {
@@ -52,15 +89,25 @@ internal class Store<T: Persistable & Equatable>: Savable {
         case .insert:
             stored?.append(value)
             print("\(value) inserted")
+            notify(from: .stickyInsert, with: [action: value])
         case .update(let index):
             print("\(stored![index]) updated to \(value)")
+            let oldValue = stored?[index]
             stored?[index] = value
+            notify(from: .stickyUpdate, with: [action: [oldValue,value]])
         case .create:
             stored?.saveWithOverwrite()
+            notify(from: .stickyCreate, with: [action: value])
         default:
-            print("\(String(describing: Object.self)): No action taken")
+            print("\(Object.name): No action taken")
         }
         stored?.saveWithOverwrite()
+    }
+    
+    private func notify(from notificationCenter: NotificationCenter, with change: [Action: Any]?) {
+        if let notificationName = Object.notificationName {
+            notificationCenter.post(name: notificationName, object: nil, userInfo: change)
+        }
     }
 }
 
