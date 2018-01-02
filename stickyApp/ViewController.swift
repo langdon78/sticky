@@ -88,21 +88,21 @@ class ViewController: UIViewController {
         registerForNotifications(for: .stickyCreate, selector: #selector(updateLabel(notification:)), name: sampleNotification)
         
         let college = College(name: "Colorado", ranking: 30, city: "Denver")
-        college.save()
+        college.saveWithCustomIndex()
         College.dumpDataStoreToLog()
         
         let chicago = Town(name: "Chicago", population: 5987298)
-        chicago.insertIfNew()
+        chicago.stick()
         
         let country = Country(name: "Japan")
-        country.insertIfNew()
+        country.stick()
         
         guard let path = Bundle.main.path(forResource: "SampleJSON", ofType: "json") else { return }
         let url = URL(fileURLWithPath: path)
         let sampleJsonData = try? Data(contentsOf: url)
         do {
             let decode = try JSONDecoder().decode([Sample].self, from: sampleJsonData!)
-            decode.forEach { $0.insertIfNew() }
+            decode.forEach { $0.stick() }
         } catch {
             print(error.localizedDescription)
         }
