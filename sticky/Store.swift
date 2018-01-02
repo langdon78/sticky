@@ -84,6 +84,17 @@ internal class Store<T: Persistable & Equatable>: Savable {
         save(with: action)
     }
     
+    internal func remove() {
+        if let index = storeIndex {
+            stored?.remove(at: index)
+            stickyLog("\(value) deleted")
+            notify(from: .stickyDelete, with: [.delete: [value]])
+            stored?.saveWithOverwrite()
+        } else {
+            stickyLog("\(value) could not be found")
+        }
+    }
+    
     private func save(with action: Action) {
         switch action {
         case .insert:
@@ -96,7 +107,7 @@ internal class Store<T: Persistable & Equatable>: Savable {
             stickyLog("\(oldValue) updated to \(value)")
             notify(from: .stickyUpdate, with: [action: [oldValue,value]])
         case .create:
-            stored?.saveWithOverwrite()
+            [value].saveWithOverwrite()
             notify(from: .stickyCreate, with: [action: [value]])
             stickyLog("Created new file for \(value))")
         default:

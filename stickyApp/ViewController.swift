@@ -1,6 +1,30 @@
 import UIKit
 import Sticky
 
+struct Sample: Persistable {
+    var id: String
+    var index: Int?
+    var guid: String?
+    var balance: String?
+    var picture: String?
+    var age: Int?
+    var eyeColor: String?
+    var name: String?
+    var gender: String?
+    var company: String?
+    var email: String?
+    var phone: String?
+    var address: String?
+    var about: String?
+    var registered: String?
+}
+
+extension Sample: Equatable {
+    static func ==(lhs: Sample, rhs: Sample) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
 struct College: Persistable {
     var name: String
     var ranking: Int?
@@ -38,9 +62,16 @@ extension Country: Equatable {
     }
 }
 
-struct Town {
+struct Town: Persistable {
     var name: String
     var population: Int
+}
+
+extension Town: Equatable {
+    static func ==(lhs: Town, rhs: Town) -> Bool {
+        return lhs.name == rhs.name &&
+        lhs.population == rhs.population
+    }
 }
 
 class ViewController: UIViewController {
@@ -49,26 +80,42 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         guard let collegeNotification = College.notificationName else { return }
+        guard let townNotification = Town.notificationName else { return }
+        guard let sampleNotification = Sample.notificationName else { return }
         
-        NotificationCenter.stickyInsert.addObserver(
-            self,
-            selector: #selector(updateLabel(notification:)),
-            name: collegeNotification,
-            object: nil
-        )
-        NotificationCenter.stickyUpdate.addObserver(
-            self,
-            selector: #selector(updateLabel(notification:)),
-            name: collegeNotification,
-            object: nil
-        )
+        registerForNotifications(for: .stickyUpdate, selector: #selector(updateLabel(notification:)), name: collegeNotification)
+        registerForNotifications(for: .stickyCreate, selector: #selector(updateLabel(notification:)), name: townNotification)
+        registerForNotifications(for: .stickyCreate, selector: #selector(updateLabel(notification:)), name: sampleNotification)
         
-        let college = College(name: "Idaho", ranking: 43, city: "Boise")
-        college.save()
+        let college = College(name: "Colorado", ranking: 30, city: "Denver")
+        college.saveWithCustomIndex()
         College.dumpDataStoreToLog()
         
+        let chicago = Town(name: "Chicago", population: 5987298)
+        chicago.stick()
+        
         let country = Country(name: "Japan")
-        country.insertIfNew()
+        country.stick()
+        
+        guard let path = Bundle.main.path(forResource: "SampleJSON", ofType: "json") else { return }
+        let url = URL(fileURLWithPath: path)
+        let sampleJsonData = try? Data(contentsOf: url)
+        do {
+            let decode = try JSONDecoder().decode([Sample].self, from: sampleJsonData!)
+            decode.forEach { $0.stick() }
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+    }
+    
+    private func registerForNotifications(for notificationCenter: NotificationCenter, selector: Selector, name: Notification.Name) {
+        notificationCenter.addObserver(
+            self,
+            selector: selector,
+            name: name,
+            object: nil
+        )
     }
 
     @objc func updateLabel(notification: NSNotification) {
@@ -87,6 +134,8 @@ class ViewController: UIViewController {
             notifcationLabel.text = "\(String(describing: college.ranking) ) updated to \(String(describing: newValue!.ranking))"
         case .create:
             notifcationLabel.text = "Created new data set: \(college.name)"
+        case .delete:
+            notifcationLabel.text = "\(college.name) deleted from data store"
         default:
             print("Not known")
         }

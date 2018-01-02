@@ -52,6 +52,10 @@ public extension Persistable {
         }
     }
     
+    public static var isRegisteredForNotifications: Bool {
+        return notificationName != nil
+    }
+    
     public static var notificationName: NSNotification.Name? {
         if Sticky.shared.registeredNotifications.contains(where: { $0 == Self.self }) {
             return NSNotification.Name(name)
@@ -86,25 +90,28 @@ public extension Persistable {
 }
 
 public extension Persistable where Self: Equatable {
-    private var store: Store<Self> {
-        let objects = Self.read()
-        return Store(value: self, stored: objects)
-    }
-    
-    private func storeAsync(completion: @escaping (Store<Self>) -> Void) {
-        Self.readAsync { result in
-            completion(Store(value: self, stored: result))
-        }
-    }
-    
+    // Public API
+    ///
+    /// Checks to see if data object is stored locally.
+    ///
     public var isStored: Bool {
         if let _ = Self.read()?.index(of: self) {
             return true
         }
         return false
     }
-    
-    public func insertIfNew() {
+    ///
+    /// If data object conforms to Equatable, this method will
+    /// scan the local store and find the first value that matches
+    /// the Equatable (==) definition.
+    ///
+    /// This method will always insert a new data object unless
+    /// data is completely unchanged, then it will do nothing.
+    ///
+    /// Use this if data object doesn't need to update and storage space
+    /// and performance are less concerning. More suited for transactional data.
+    ///
+    public func stick() {
         stickyLog("\(Self.name) saving without index")
         if Sticky.shared.configuration.async {
             storeAsync { store in
@@ -115,12 +122,60 @@ public extension Persistable where Self: Equatable {
         }
     }
     
+    public func deleteFromStore() {
+        delete(from: self.store)
+    }
+    
+    // Implementation
+    
+    fileprivate func delete(from store: Store<Self>) {
+        stickyLog("\(Self.name) removing data \(self)")
+        store.remove()
+    }
+    
     fileprivate func save(in store: Store<Self>) {
         store.save()
     }
+    
+    private var store: Store<Self> {
+        let objects = Self.read()
+        return Store(value: self, stored: objects)
+    }
+    
+    private func storeAsync(completion: @escaping (Store<Self>) -> Void) {
+        Self.readAsync { result in
+            completion(Store(value: self, stored: result))
+        }
+    }
 }
 
+//MARK: - Persistable - Equatable & UniqueIndexable
+
 public extension Persistable where Self: Equatable & UniqueIndexable {
+    // Public API
+    ///
+    /// When data object conforms to UniqueIndexable, this method will seek
+    /// the unique stored data element that matches the index and either:
+    ///   1. Update the non-indexed values if needed
+    ///   2. Insert the new record
+    ///   3. Do nothing if data is unchanged.
+    ///
+    /// Use this method if you have data objects with one or two
+    /// properties that ensure uniqueness and need to update values frequently.
+    ///
+    public func saveWithCustomIndex() {
+        stickyLog("\(Self.name) saving with index")
+        if Sticky.shared.configuration.async {
+            indexStoreAsync { store in
+                self.save(in: store)
+            }
+        } else {
+            save(in: self.indexStore)
+        }
+    }
+    
+    // Implementation
+    
     private var indexStore: IndexStore<Self> {
         let objects = Self.read()
         return IndexStore(value: self, stored: objects)
@@ -131,26 +186,13 @@ public extension Persistable where Self: Equatable & UniqueIndexable {
             completion(IndexStore(value: self, stored: result))
         }
     }
-    
-    public func save() {
-        stickyLog("\(Self.name) saving with index")
-        if Sticky.shared.configuration.async {
-            indexStoreAsync { store in
-                self.save(in: store)
-            }
-        } else {
-            save(in: self.indexStore)
-        }
-    }
 }
 
 internal extension Collection where Element: Persistable, Self: Codable {
     internal func saveWithOverwrite() {
         guard let encodedData = encode(self) else { return }
         let path = FileHandler.fullPath(for: Element.self)
-        DispatchQueue.main.async {
-            FileHandler.write(data: encodedData, to: path)
-        }
+        FileHandler.write(data: encodedData, to: path)
     }
     
     private func encode<T>(_ obj: T) -> Data? where T: Encodable {
