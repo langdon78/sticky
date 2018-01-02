@@ -15,7 +15,6 @@
 		BC265ED11FF93B850068422A /* stickyAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265ED01FF93B850068422A /* stickyAppTests.swift */; };
 		BC265F311FF942C70068422A /* Sticky.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC265F281FF942C70068422A /* Sticky.framework */; };
 		BC265F381FF942C70068422A /* StickyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F371FF942C70068422A /* StickyTests.swift */; };
-		BC265F3A1FF942C70068422A /* Sticky.h in Headers */ = {isa = PBXBuildFile; fileRef = BC265F2A1FF942C70068422A /* Sticky.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		BC265F3D1FF942C70068422A /* Sticky.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC265F281FF942C70068422A /* Sticky.framework */; };
 		BC265F3E1FF942C70068422A /* Sticky.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BC265F281FF942C70068422A /* Sticky.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		BC265F491FF9438F0068422A /* Persistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F481FF9438F0068422A /* Persistable.swift */; };
@@ -84,7 +83,6 @@
 		BC265ED01FF93B850068422A /* stickyAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = stickyAppTests.swift; sourceTree = "<group>"; };
 		BC265ED21FF93B850068422A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BC265F281FF942C70068422A /* Sticky.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sticky.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BC265F2A1FF942C70068422A /* Sticky.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Sticky.h; sourceTree = "<group>"; };
 		BC265F2B1FF942C70068422A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BC265F301FF942C70068422A /* StickyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StickyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC265F371FF942C70068422A /* StickyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyTests.swift; sourceTree = "<group>"; };
@@ -180,7 +178,6 @@
 		BC265F291FF942C70068422A /* Sticky */ = {
 			isa = PBXGroup;
 			children = (
-				BC265F2A1FF942C70068422A /* Sticky.h */,
 				BC265F2B1FF942C70068422A /* Info.plist */,
 				BC265F4A1FF9523A0068422A /* FileHandler.swift */,
 				BC265F481FF9438F0068422A /* Persistable.swift */,
@@ -208,7 +205,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC265F3A1FF942C70068422A /* Sticky.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
