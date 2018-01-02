@@ -38,9 +38,16 @@ extension Country: Equatable {
     }
 }
 
-struct Town {
+struct Town: Persistable {
     var name: String
     var population: Int
+}
+
+extension Town: Equatable {
+    static func ==(lhs: Town, rhs: Town) -> Bool {
+        return lhs.name == rhs.name &&
+        lhs.population == rhs.population
+    }
 }
 
 class ViewController: UIViewController {
@@ -49,26 +56,29 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         guard let collegeNotification = College.notificationName else { return }
+        guard let townNotification = Town.notificationName else { return }
         
-        NotificationCenter.stickyInsert.addObserver(
-            self,
-            selector: #selector(updateLabel(notification:)),
-            name: collegeNotification,
-            object: nil
-        )
-        NotificationCenter.stickyUpdate.addObserver(
-            self,
-            selector: #selector(updateLabel(notification:)),
-            name: collegeNotification,
-            object: nil
-        )
+        registerForNotifications(for: .stickyUpdate, selector: #selector(updateLabel(notification:)), name: collegeNotification)
+        registerForNotifications(for: .stickyCreate, selector: #selector(updateLabel(notification:)), name: townNotification)
         
-        let college = College(name: "Idaho", ranking: 43, city: "Boise")
+        let college = College(name: "Colorado", ranking: 30, city: "Denver")
         college.save()
         College.dumpDataStoreToLog()
         
+        let chicago = Town(name: "Chicago", population: 5987298)
+        chicago.insertIfNew()
+        
         let country = Country(name: "Japan")
         country.insertIfNew()
+    }
+    
+    private func registerForNotifications(for notificationCenter: NotificationCenter, selector: Selector, name: Notification.Name) {
+        notificationCenter.addObserver(
+            self,
+            selector: selector,
+            name: name,
+            object: nil
+        )
     }
 
     @objc func updateLabel(notification: NSNotification) {
@@ -87,6 +97,8 @@ class ViewController: UIViewController {
             notifcationLabel.text = "\(String(describing: college.ranking) ) updated to \(String(describing: newValue!.ranking))"
         case .create:
             notifcationLabel.text = "Created new data set: \(college.name)"
+        case .delete:
+            notifcationLabel.text = "\(college.name) deleted from data store"
         default:
             print("Not known")
         }
