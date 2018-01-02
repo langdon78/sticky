@@ -1,15 +1,15 @@
 import Foundation
 
-public protocol Persistable: Codable {}
+public protocol Stickable: Codable {}
 
 public protocol StickyKey {
     associatedtype Key: Equatable
     var key: Key { get }
 }
 
-public typealias Stickyable = Persistable & Equatable & StickyKey
+internal typealias Stickyable = Stickable & Equatable & StickyKey
 
-public extension Persistable {
+public extension Stickable {
     
     public static func read() -> [Self]? {
         return Self.decode(from: fileData)
@@ -89,7 +89,7 @@ public extension Persistable {
     }
 }
 
-public extension Persistable where Self: Equatable {
+public extension Stickable where Self: Equatable {
     // Public API
     ///
     /// Checks to see if data object is stored locally.
@@ -149,9 +149,9 @@ public extension Persistable where Self: Equatable {
     }
 }
 
-//MARK: - Persistable - Equatable & StickyKey
+//MARK: - Stickable - Equatable & StickyKey
 
-public extension Persistable where Self: Equatable & StickyKey {
+public extension Stickable where Self: Equatable & StickyKey {
     // Public API
     ///
     /// When data object conforms to StickyKey, this method will seek
@@ -188,7 +188,7 @@ public extension Persistable where Self: Equatable & StickyKey {
     }
 }
 
-internal extension Collection where Element: Persistable, Self: Codable {
+internal extension Collection where Element: Stickable, Self: Codable {
     internal func saveWithOverwrite() {
         guard let encodedData = encode(self) else { return }
         let path = FileHandler.fullPath(for: Element.self)

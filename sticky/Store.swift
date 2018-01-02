@@ -1,7 +1,7 @@
 import Foundation
 
 internal protocol Savable {
-    associatedtype Object: Persistable
+    associatedtype Object: Stickable
     func save()
 }
 
@@ -50,7 +50,7 @@ extension Action: Equatable {
     }
 }
 
-internal class Store<T: Persistable & Equatable>: Savable {
+internal class Store<T: Stickable & Equatable>: Savable {
     typealias Object = T
     
     private var value: Object

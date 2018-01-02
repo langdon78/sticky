@@ -1,7 +1,7 @@
 import UIKit
 import Sticky
 
-struct Sample: Persistable {
+struct Sample: Stickable {
     var id: String
     var index: Int?
     var guid: String?
@@ -25,7 +25,7 @@ extension Sample: Equatable {
     }
 }
 
-struct College: Persistable {
+struct College: Stickable {
     var name: String
     var ranking: Int?
     var city: String?
@@ -52,7 +52,7 @@ extension College: StickyKey {
     }
 }
 
-struct Country: Persistable {
+struct Country: Stickable {
     var name: String
 }
 
@@ -62,7 +62,7 @@ extension Country: Equatable {
     }
 }
 
-struct Town: Persistable {
+struct Town: Stickable {
     var name: String
     var population: Int
 }

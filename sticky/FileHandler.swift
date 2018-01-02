@@ -9,7 +9,7 @@ internal class FileHandler {
         return Sticky.shared.configuration.fileExtensionName
     }
     
-    internal static func fullPath(for persistantObject: Persistable.Type) -> String {
+    internal static func fullPath(for persistantObject: Stickable.Type) -> String {
         var configuredUrl = FileHandler.localDirectory
         let fileName = String(describing: persistantObject)
         let fileExtension = FileHandler.fileExtensionName

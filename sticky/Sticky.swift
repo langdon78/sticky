@@ -11,7 +11,7 @@ public func stickyLog(_ content: Any) {
 public class Sticky {
     public static let shared = Sticky()
     
-    internal var registeredNotifications: [Persistable.Type] = []
+    internal var registeredNotifications: [Stickable.Type] = []
     
     internal var configuration: StickyConfiguration {
         return configurationSettings.configuration

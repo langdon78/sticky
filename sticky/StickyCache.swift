@@ -1,10 +1,10 @@
 import Foundation
 
 class StickyCache {
-    var stored: [Persistable]?
+    var stored: [Stickable]?
     static let shared: StickyCache = StickyCache()
     
-    private init(stored: [Persistable]? = nil) {
+    private init(stored: [Stickable]? = nil) {
         self.stored = stored
     }
 }
