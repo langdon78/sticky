@@ -153,13 +153,11 @@ public extension Persistable where Self: Equatable & UniqueIndexable {
     }
 }
 
-internal extension Collection where Element: Persistable, Self: Codable {
-    internal func saveWithOverwrite() {
+public extension Collection where Element: Persistable, Self: Codable {
+    public func saveWithOverwrite() {
         guard let encodedData = encode(self) else { return }
         let path = FileHandler.fullPath(for: Element.self)
-        DispatchQueue.main.async {
-            FileHandler.write(data: encodedData, to: path)
-        }
+        FileHandler.write(data: encodedData, to: path)
     }
     
     private func encode<T>(_ obj: T) -> Data? where T: Encodable {
