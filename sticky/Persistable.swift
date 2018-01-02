@@ -115,6 +115,15 @@ public extension Persistable where Self: Equatable {
         }
     }
     
+    public func deleteFromStore() {
+        delete(from: self.store)
+    }
+    
+    fileprivate func delete(from store: Store<Self>) {
+        stickyLog("\(Self.name) removing data \(self)")
+        store.remove()
+    }
+    
     fileprivate func save(in store: Store<Self>) {
         store.save()
     }
