@@ -38,17 +38,17 @@ extension College: Equatable {
     }
 }
 
-extension College: UniqueIndexable {
-    struct Index: Equatable {
+extension College: StickyKey {
+    struct Key: Equatable {
         var name: String
 
-        static func ==(lhs: Index, rhs: Index) -> Bool {
+        static func ==(lhs: Key, rhs: Key) -> Bool {
             return lhs.name == rhs.name
         }
     }
     
-    var index: College.Index {
-        return College.Index(name: self.name)
+    var key: College.Key {
+        return College.Key(name: self.name)
     }
 }
 
@@ -88,14 +88,14 @@ class ViewController: UIViewController {
         registerForNotifications(for: .stickyCreate, selector: #selector(updateLabel(notification:)), name: sampleNotification)
         
         let college = College(name: "Colorado", ranking: 30, city: "Denver")
-        college.saveWithCustomIndex()
+        college.stickWithKey()
         College.dumpDataStoreToLog()
         
         let chicago = Town(name: "Chicago", population: 5987298)
         chicago.stick()
         
         let country = Country(name: "Japan")
-        country.stick()
+        country.unstick()
         
         guard let path = Bundle.main.path(forResource: "SampleJSON", ofType: "json") else { return }
         let url = URL(fileURLWithPath: path)

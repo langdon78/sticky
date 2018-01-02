@@ -58,7 +58,7 @@ internal class Store<T: Persistable & Equatable>: Savable {
     
     private var action: Action {
         if let objects = stored {
-            if let index = storeIndex {
+            if let index = index {
                 if objects[index] != value {
                     return .update(index)
                 }
@@ -71,7 +71,7 @@ internal class Store<T: Persistable & Equatable>: Savable {
         return .none
     }
     
-    var storeIndex: Int? {
+    var index: Int? {
         return stored?.index(of: value)
     }
     
@@ -85,7 +85,7 @@ internal class Store<T: Persistable & Equatable>: Savable {
     }
     
     internal func remove() {
-        if let index = storeIndex {
+        if let index = index {
             stored?.remove(at: index)
             stickyLog("\(value) deleted")
             notify(from: .stickyDelete, with: [.delete: [value]])
@@ -123,19 +123,19 @@ internal class Store<T: Persistable & Equatable>: Savable {
     }
 }
 
-internal class IndexStore<T: Stickyable>: Store<T> {
+internal class KeyStore<T: Stickyable>: Store<T> {
     typealias Object = T
     
-    var objectIndex: Object.Index
+    var objectKey: Object.Key
     
-    override var storeIndex: Int? {
+    override var index: Int? {
         return stored?
-            .map({ $0.index })
-            .index(of: objectIndex)
+            .map({ $0.key })
+            .index(of: objectKey)
     }
     
     override init(value: T, stored: [Object]?) {
-        self.objectIndex = value.index
+        self.objectKey = value.key
         super.init(value: value, stored: stored)
     }
 }

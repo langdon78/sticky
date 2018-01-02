@@ -2,12 +2,12 @@ import Foundation
 
 public protocol Persistable: Codable {}
 
-public protocol UniqueIndexable {
-    associatedtype Index: Equatable
-    var index: Index { get }
+public protocol StickyKey {
+    associatedtype Key: Equatable
+    var key: Key { get }
 }
 
-public typealias Stickyable = Persistable & Equatable & UniqueIndexable
+public typealias Stickyable = Persistable & Equatable & StickyKey
 
 public extension Persistable {
     
@@ -112,7 +112,7 @@ public extension Persistable where Self: Equatable {
     /// and performance are less concerning. More suited for transactional data.
     ///
     public func stick() {
-        stickyLog("\(Self.name) saving without index")
+        stickyLog("\(Self.name) saving without key")
         if Sticky.shared.configuration.async {
             storeAsync { store in
                 self.save(in: store)
@@ -122,7 +122,7 @@ public extension Persistable where Self: Equatable {
         }
     }
     
-    public func deleteFromStore() {
+    public func unstick() {
         delete(from: self.store)
     }
     
@@ -149,41 +149,41 @@ public extension Persistable where Self: Equatable {
     }
 }
 
-//MARK: - Persistable - Equatable & UniqueIndexable
+//MARK: - Persistable - Equatable & StickyKey
 
-public extension Persistable where Self: Equatable & UniqueIndexable {
+public extension Persistable where Self: Equatable & StickyKey {
     // Public API
     ///
-    /// When data object conforms to UniqueIndexable, this method will seek
-    /// the unique stored data element that matches the index and either:
-    ///   1. Update the non-indexed values if needed
-    ///   2. Insert the new record
+    /// When data object conforms to StickyKey, this method will seek
+    /// the unique stored data element that matches the key and either:
+    ///   1. Update the non-key values if needed
+    ///   2. Store the new object
     ///   3. Do nothing if data is unchanged.
     ///
     /// Use this method if you have data objects with one or two
     /// properties that ensure uniqueness and need to update values frequently.
     ///
-    public func saveWithCustomIndex() {
-        stickyLog("\(Self.name) saving with index")
+    public func stickWithKey() {
+        stickyLog("\(Self.name) saving with key")
         if Sticky.shared.configuration.async {
-            indexStoreAsync { store in
+            storeWithKeyAsync { store in
                 self.save(in: store)
             }
         } else {
-            save(in: self.indexStore)
+            save(in: self.storeWithKey)
         }
     }
     
     // Implementation
     
-    private var indexStore: IndexStore<Self> {
+    private var storeWithKey: KeyStore<Self> {
         let objects = Self.read()
-        return IndexStore(value: self, stored: objects)
+        return KeyStore(value: self, stored: objects)
     }
     
-    private func indexStoreAsync(completion: @escaping (IndexStore<Self>) -> Void) {
+    private func storeWithKeyAsync(completion: @escaping (KeyStore<Self>) -> Void) {
         Self.readAsync { result in
-            completion(IndexStore(value: self, stored: result))
+            completion(KeyStore(value: self, stored: result))
         }
     }
 }
