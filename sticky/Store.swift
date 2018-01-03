@@ -46,7 +46,12 @@ extension Action: CustomStringConvertible {
 
 extension Action: Equatable {
     public static func ==(lhs: Action, rhs: Action) -> Bool {
-        return lhs.hashValue == rhs.hashValue
+        switch (lhs,rhs) {
+        case (.update(let a), .update(let b)):
+            return a == b
+        default:
+            return lhs.hashValue == rhs.hashValue
+        }
     }
 }
 
