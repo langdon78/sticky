@@ -87,11 +87,20 @@ class ViewController: UIViewController {
         registerForNotifications(for: .stickyCreate, selector: #selector(updateLabel(notification:)), name: townNotification)
         registerForNotifications(for: .stickyCreate, selector: #selector(updateLabel(notification:)), name: sampleNotification)
         
-        let college = College(name: "Colorado", ranking: 30, city: "Denver")
+        let college = College(name: "Maine", ranking: 60, city: "Portland")
         college.stickWithKey()
+        
+        DispatchQueue.main.async {
+            College(name: "Kasnas", ranking: 5, city: "Lawrence").stickWithKey()
+        }
+        
+        DispatchQueue.main.async {
+            College(name: "Illinois", ranking: 2, city: "Champagne").stickWithKey()
+        }
+        
         College.dumpDataStoreToLog()
         
-        let chicago = Town(name: "Chicago", population: 5987298)
+        let chicago = Town(name: "New York", population: 6984298)
         chicago.stick()
         
         let country = Country(name: "Japan")
