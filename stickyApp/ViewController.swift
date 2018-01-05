@@ -2,21 +2,12 @@ import UIKit
 import Sticky
 
 struct Sample: Stickable {
-    var id: String
-    var index: Int?
-    var guid: String?
-    var balance: String?
-    var picture: String?
-    var age: Int?
-    var eyeColor: String?
-    var name: String?
-    var gender: String?
-    var company: String?
-    var email: String?
-    var phone: String?
-    var address: String?
-    var about: String?
-    var registered: String?
+    var id: Int
+    var first_name: String
+    var last_name: String
+    var email: String
+    var gender: String
+    var ip_address: String
 }
 
 extension Sample: Equatable {
@@ -95,7 +86,7 @@ class ViewController: UIViewController {
         }
         
         DispatchQueue.main.async {
-            College(name: "Illinois", ranking: 2, city: "Champagne").stickWithKey()
+            College(name: "Illinois", ranking: 1, city: "Champagne").stickWithKey()
         }
         
         College.dumpDataStoreToLog()
@@ -106,16 +97,19 @@ class ViewController: UIViewController {
         let country = Country(name: "Japan")
         country.unstick()
         
-        guard let path = Bundle.main.path(forResource: "SampleJSON", ofType: "json") else { return }
+        guard let path = Bundle.main.path(forResource: "Sample", ofType: "json") else { return }
         let url = URL(fileURLWithPath: path)
         let sampleJsonData = try? Data(contentsOf: url)
+
         do {
             let decode = try JSONDecoder().decode([Sample].self, from: sampleJsonData!)
+            // background
+//            decode.stickAll()
+            // main thread
             decode.forEach { $0.stick() }
         } catch {
             print(error.localizedDescription)
         }
-        
     }
     
     private func registerForNotifications(for notificationCenter: NotificationCenter, selector: Selector, name: Notification.Name) {

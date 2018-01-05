@@ -17,11 +17,11 @@
 		BC265F381FF942C70068422A /* StickyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F371FF942C70068422A /* StickyTests.swift */; };
 		BC265F3D1FF942C70068422A /* Sticky.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BC265F281FF942C70068422A /* Sticky.framework */; };
 		BC265F3E1FF942C70068422A /* Sticky.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BC265F281FF942C70068422A /* Sticky.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		BC265F491FF9438F0068422A /* Persistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F481FF9438F0068422A /* Persistable.swift */; };
+		BC265F491FF9438F0068422A /* Stickable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F481FF9438F0068422A /* Stickable.swift */; };
 		BC265F4B1FF9523A0068422A /* FileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F4A1FF9523A0068422A /* FileHandler.swift */; };
 		BC265F4D1FF953320068422A /* Sticky.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F4C1FF953320068422A /* Sticky.swift */; };
 		BC265F4F1FF953CF0068422A /* StickyConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */; };
-		BC2FF9FF1FFB8461002711E1 /* SampleJSON.json in Resources */ = {isa = PBXBuildFile; fileRef = BC2FF9FD1FFB7FA1002711E1 /* SampleJSON.json */; };
+		BCB4328F1FFCDF61009303C7 /* Sample.json in Resources */ = {isa = PBXBuildFile; fileRef = BCB4328E1FFCDF61009303C7 /* Sample.json */; };
 		BCE4CC6A1FFA68B300E55FE5 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE4CC691FFA68B300E55FE5 /* Store.swift */; };
 		BCE4CC6C1FFA69AF00E55FE5 /* StickyCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */; };
 /* End PBXBuildFile section */
@@ -87,11 +87,11 @@
 		BC265F301FF942C70068422A /* StickyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StickyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC265F371FF942C70068422A /* StickyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyTests.swift; sourceTree = "<group>"; };
 		BC265F391FF942C70068422A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BC265F481FF9438F0068422A /* Persistable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Persistable.swift; sourceTree = "<group>"; };
+		BC265F481FF9438F0068422A /* Stickable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stickable.swift; sourceTree = "<group>"; };
 		BC265F4A1FF9523A0068422A /* FileHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandler.swift; sourceTree = "<group>"; };
 		BC265F4C1FF953320068422A /* Sticky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticky.swift; sourceTree = "<group>"; };
 		BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyConfiguration.swift; sourceTree = "<group>"; };
-		BC2FF9FD1FFB7FA1002711E1 /* SampleJSON.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SampleJSON.json; sourceTree = "<group>"; };
+		BCB4328E1FFCDF61009303C7 /* Sample.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Sample.json; sourceTree = "<group>"; };
 		BCE4CC691FFA68B300E55FE5 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Store.swift; path = sticky/Store.swift; sourceTree = SOURCE_ROOT; };
 		BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -155,7 +155,7 @@
 		BC265EBA1FF93B850068422A /* stickyApp */ = {
 			isa = PBXGroup;
 			children = (
-				BC2FF9FD1FFB7FA1002711E1 /* SampleJSON.json */,
+				BCB4328E1FFCDF61009303C7 /* Sample.json */,
 				BC265EBB1FF93B850068422A /* AppDelegate.swift */,
 				BC265EBD1FF93B850068422A /* ViewController.swift */,
 				BC265EBF1FF93B850068422A /* Main.storyboard */,
@@ -180,7 +180,7 @@
 			children = (
 				BC265F2B1FF942C70068422A /* Info.plist */,
 				BC265F4A1FF9523A0068422A /* FileHandler.swift */,
-				BC265F481FF9438F0068422A /* Persistable.swift */,
+				BC265F481FF9438F0068422A /* Stickable.swift */,
 				BC265F4C1FF953320068422A /* Sticky.swift */,
 				BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */,
 				BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */,
@@ -342,8 +342,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC2FF9FF1FFB8461002711E1 /* SampleJSON.json in Resources */,
 				BC265EC61FF93B850068422A /* LaunchScreen.storyboard in Resources */,
+				BCB4328F1FFCDF61009303C7 /* Sample.json in Resources */,
 				BC265EC31FF93B850068422A /* Assets.xcassets in Resources */,
 				BC265EC11FF93B850068422A /* Main.storyboard in Resources */,
 			);
@@ -398,7 +398,7 @@
 				BC265F4D1FF953320068422A /* Sticky.swift in Sources */,
 				BC265F4F1FF953CF0068422A /* StickyConfiguration.swift in Sources */,
 				BC265F4B1FF9523A0068422A /* FileHandler.swift in Sources */,
-				BC265F491FF9438F0068422A /* Persistable.swift in Sources */,
+				BC265F491FF9438F0068422A /* Stickable.swift in Sources */,
 				BCE4CC6C1FFA69AF00E55FE5 /* StickyCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
