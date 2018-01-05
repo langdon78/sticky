@@ -19,7 +19,13 @@ internal class FileHandler {
     }
     
     internal static func read(from path: String) -> Data? {
-        return FileManager.default.contents(atPath: path)
+        let url = URL(fileURLWithPath: path)
+        do {
+            return try Data(contentsOf: url)
+        } catch {
+            stickyLog("ERROR: \(error.localizedDescription)")
+        }
+        return nil
     }
     
     internal static func write(data: Data, to path: String) {
