@@ -1,6 +1,8 @@
 import Foundation
 
-class StickyCache {
+internal let cache = StickyCache.shared
+
+internal class StickyCache {
     var stored: [Stickable]?
     static let shared: StickyCache = StickyCache()
     
