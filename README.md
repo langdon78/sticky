@@ -114,12 +114,20 @@ Candy.read()
 ```
 
 ### Configuration
+Also, when you first initialize Sticky (for instance, from AppDelegate), you can configure it to clear the directory on startup which gives you a clean slate.
 ```swift
 let stickyConfig = StickyConfiguration(
     preloadCache: false, 
     clearDirectory: true, 
     async: false, 
     logging: true)
-    
+
 Sticky.configure(with: .custom(stickyConfig))
+```
+
+Of course, you can grab the directory and remove the `.json` files yourself.
+
+```swift
+print(Sticky.shared.configuration.localDirectory)
+// /var/folders/63/hmdwgb3148v4_xzv_jff_ztr0000gn/T/com.apple.dt.Xcode.pg/containers/com.apple.dt.playground.stub.iOS_Simulator.stickyExample-D9C1FB9E-545E-459A-9B57-8191A9B10FC4/Documents/
 ```
