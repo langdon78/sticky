@@ -1,5 +1,8 @@
 import Foundation
 
+fileprivate let queueNameWrite = "com.sticky.write"
+fileprivate let queueNameWriteAll = "com.sticky.writeAll"
+
 public protocol Stickable: Codable {}
 
 public protocol StickyKey {
@@ -7,12 +10,16 @@ public protocol StickyKey {
     var key: Key { get }
 }
 
-internal typealias Stickyable = Stickable & Equatable & StickyKey
+public typealias Stickyable = Stickable & Equatable & StickyKey
 
 public extension Stickable {
     
     public static func read() -> [Self]? {
-        return Self.decode(from: fileData)
+        if let data = StickyCache.shared.stored, data is [Self] {
+            return data as? [Self]
+        } else {
+            return Self.decode(from: fileData)
+        }
     }
     
     public static func readAsync(completion: @escaping ([Self]?) -> Void) {
@@ -24,7 +31,8 @@ public extension Stickable {
     public static func dumpDataStoreToLog() {
         if Sticky.shared.configuration.logging {
             if Sticky.shared.configuration.async {
-                DispatchQueue.main.async {
+                let queue = DispatchQueue(label: "com.sticky.log", qos: .background)
+                queue.async {
                     guard let data = fileData else { return }
                     stickyLog("\(name): \(String(bytes: data, encoding: .utf8) ?? "")")
                 }
@@ -70,13 +78,14 @@ public extension Stickable {
     
     private static func decode(from data: Data?) -> [Self]? {
         var decoded: [Self]? = nil
-        guard let jsonData = data else { return nil }
+        guard let jsonData = data, !jsonData.isEmpty else { return nil }
         do {
             decoded = try JSONDecoder().decode([Self].self, from: jsonData)
         } catch {
             print("ERROR: \(name).\(#function) \(error.localizedDescription) Make sure any new data properties are marked as optional.")
             fatalError()
         }
+        StickyCache.shared.stored = decoded
         return decoded
     }
     
@@ -113,39 +122,24 @@ public extension Stickable where Self: Equatable {
     ///
     public func stick() {
         stickyLog("\(Self.name) saving without key")
-        if Sticky.shared.configuration.async {
-            storeAsync { store in
-                self.save(in: store)
-            }
-        } else {
-            save(in: self.store)
-        }
+        self.save()
     }
     
     public func unstick() {
-        delete(from: self.store)
+        delete()
     }
     
     // Implementation
     
-    fileprivate func delete(from store: Store<Self>) {
+    fileprivate func delete() {
         stickyLog("\(Self.name) removing data \(self)")
-        store.remove()
+        let index = Self.read()?.index(of: self)
+        Store.remove(value: self, from: Self.read(), at: index)
     }
     
-    fileprivate func save(in store: Store<Self>) {
-        store.save()
-    }
-    
-    private var store: Store<Self> {
-        let objects = Self.read()
-        return Store(value: self, stored: objects)
-    }
-    
-    private func storeAsync(completion: @escaping (Store<Self>) -> Void) {
-        Self.readAsync { result in
-            completion(Store(value: self, stored: result))
-        }
+    fileprivate func save() {
+        let index = Self.read()?.index(of: self)
+        Store.save(value: self, to: Self.read(), at: index)
     }
 }
 
@@ -165,34 +159,21 @@ public extension Stickable where Self: Equatable & StickyKey {
     ///
     public func stickWithKey() {
         stickyLog("\(Self.name) saving with key")
-        if Sticky.shared.configuration.async {
-            storeWithKeyAsync { store in
-                self.save(in: store)
-            }
-        } else {
-            save(in: self.storeWithKey)
-        }
-    }
-    
-    // Implementation
-    
-    private var storeWithKey: KeyStore<Self> {
-        let objects = Self.read()
-        return KeyStore(value: self, stored: objects)
-    }
-    
-    private func storeWithKeyAsync(completion: @escaping (KeyStore<Self>) -> Void) {
-        Self.readAsync { result in
-            completion(KeyStore(value: self, stored: result))
-        }
+        let index = Self.read()?
+                    .map({ $0.key })
+                    .index(of: self.key)
+        Store.save(value: self, to: Self.read(), at: index)
     }
 }
 
-internal extension Collection where Element: Stickable, Self: Codable {
+public extension Collection where Element: Stickable, Self: Codable {
     internal func saveWithOverwrite() {
-        guard let encodedData = encode(self) else { return }
-        let path = FileHandler.fullPath(for: Element.self)
-        FileHandler.write(data: encodedData, to: path)
+        let queue = DispatchQueue(label: queueNameWriteAll)
+        queue.async {
+            guard let encodedData = self.encode(self) else { return }
+            let path = FileHandler.fullPath(for: Element.self)
+            FileHandler.write(data: encodedData, to: path)
+        }
     }
     
     private func encode<T>(_ obj: T) -> Data? where T: Encodable {
@@ -204,4 +185,40 @@ internal extension Collection where Element: Stickable, Self: Codable {
         }
         return data
     }
+}
+
+public extension Collection where Element: Stickable & Equatable, Self: Codable {
+    public func stickAll() {
+        if Sticky.shared.configuration.async {
+            let queue = DispatchQueue(label: queueNameWrite)
+            queue.sync {
+                self.forEach { savable in
+                    savable.stick()
+                }
+            }
+        } else {
+            self.forEach { savable in
+                savable.stick()
+            }
+        }
+    }
+
+}
+
+public extension Collection where Element: Stickyable, Self: Codable {
+    public func stickAllWithKey() {
+        if Sticky.shared.configuration.async {
+            let queue = DispatchQueue(label: queueNameWrite)
+            queue.async {
+                self.forEach { savable in
+                    savable.stickWithKey()
+                }
+            }
+        } else {
+            self.forEach { savable in
+                savable.stickWithKey()
+            }
+        }
+    }
+    
 }

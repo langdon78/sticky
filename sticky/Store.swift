@@ -55,13 +55,8 @@ extension Action: Equatable {
     }
 }
 
-internal class Store<T: Stickable & Equatable>: Savable {
-    typealias Object = T
-    
-    private var value: Object
-    fileprivate var stored: [Object]?
-    
-    private var action: Action {
+internal class Store {
+    private static func getAction<T: Stickable & Equatable>(from stored: [T]?, with value: T, at index: Int?) -> Action {
         if let objects = stored {
             if let index = index {
                 if objects[index] != value {
@@ -76,20 +71,8 @@ internal class Store<T: Stickable & Equatable>: Savable {
         return .none
     }
     
-    var index: Int? {
-        return stored?.index(of: value)
-    }
-    
-    init(value: Object, stored: [Object]?) {
-        self.value = value
-        self.stored = stored
-    }
-    
-    internal func save() {
-        save(with: action)
-    }
-    
-    internal func remove() {
+    internal static func remove<T: Stickable & Equatable>(value: T, from dataSet: [T]?, at index: Int?) {
+        var stored = dataSet
         if let index = index {
             stored?.remove(at: index)
             stickyLog("\(value) deleted")
@@ -100,47 +83,34 @@ internal class Store<T: Stickable & Equatable>: Savable {
         }
     }
     
-    private func save(with action: Action) {
+    internal static func save<T: Stickable & Equatable>(value: T, to dataSet: [T]?, at index: Int?) {
+        let action = getAction(from: dataSet, with: value, at: index)
+        var stored = dataSet
         switch action {
         case .insert:
             stored?.append(value)
             stickyLog("\(value) inserted")
-            notify(from: .stickyInsert, with: [action: [value]])
+            stored?.saveWithOverwrite()
+            notify(from: .stickyInsert, with: [action: [value]], notificationName: T.notificationName)
         case .update(let index):
             guard let oldValue = stored?[index] else { return }
             stored?[index] = value
             stickyLog("\(oldValue) updated to \(value)")
-            notify(from: .stickyUpdate, with: [action: [oldValue,value]])
+            stored?.saveWithOverwrite()
+            notify(from: .stickyUpdate, with: [action: [oldValue,value]], notificationName: T.notificationName)
         case .create:
             [value].saveWithOverwrite()
-            notify(from: .stickyCreate, with: [action: [value]])
+            notify(from: .stickyCreate, with: [action: [value]], notificationName: T.notificationName)
             stickyLog("Created new file for \(value))")
         default:
-            stickyLog("\(Object.name): No action taken")
+            stickyLog("\(T.name): No action taken")
         }
-        stored?.saveWithOverwrite()
+        StickyCache.shared.stored = stored
     }
     
-    private func notify(from notificationCenter: NotificationCenter, with change: [Action: Any]?) {
-        if let notificationName = Object.notificationName {
+    private static func notify(from notificationCenter: NotificationCenter, with change: [Action: Any]?, notificationName: NSNotification.Name? = nil) {
+        if let notificationName = notificationName {
             notificationCenter.post(name: notificationName, object: nil, userInfo: change)
         }
-    }
-}
-
-internal class KeyStore<T: Stickyable>: Store<T> {
-    typealias Object = T
-    
-    var objectKey: Object.Key
-    
-    override var index: Int? {
-        return stored?
-            .map({ $0.key })
-            .index(of: objectKey)
-    }
-    
-    override init(value: T, stored: [Object]?) {
-        self.objectKey = value.key
-        super.init(value: value, stored: stored)
     }
 }

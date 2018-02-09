@@ -2,26 +2,35 @@ import UIKit
 import Sticky
 
 struct Sample: Stickable {
-    var id: String
-    var index: Int?
-    var guid: String?
-    var balance: String?
-    var picture: String?
-    var age: Int?
-    var eyeColor: String?
-    var name: String?
-    var gender: String?
-    var company: String?
-    var email: String?
-    var phone: String?
-    var address: String?
-    var about: String?
-    var registered: String?
+    var id: Int
+    var first_name: String
+    var last_name: String
+    var email: String
+    var gender: String
+    var ip_address: String
 }
 
 extension Sample: Equatable {
     static func ==(lhs: Sample, rhs: Sample) -> Bool {
-        return lhs.id == rhs.id
+        return lhs.id == rhs.id &&
+        lhs.first_name == rhs.first_name &&
+        lhs.first_name == rhs.first_name &&
+        lhs.email == rhs.email &&
+        lhs.gender == rhs.gender &&
+        lhs.ip_address == rhs.ip_address
+    }
+}
+
+extension Sample: StickyKey {
+    struct Key: Equatable {
+        var id: Int
+        
+        static func ==(lhs: Key, rhs: Key) -> Bool {
+            return lhs.id == rhs.id
+        }
+    }
+    var key: Sample.Key {
+        return Sample.Key(id: self.id)
     }
 }
 
@@ -95,7 +104,7 @@ class ViewController: UIViewController {
         }
         
         DispatchQueue.main.async {
-            College(name: "Illinois", ranking: 2, city: "Champagne").stickWithKey()
+            College(name: "Illinois", ranking: 1, city: "Champagne").stickWithKey()
         }
         
         College.dumpDataStoreToLog()
@@ -106,16 +115,24 @@ class ViewController: UIViewController {
         let country = Country(name: "Japan")
         country.unstick()
         
-        guard let path = Bundle.main.path(forResource: "SampleJSON", ofType: "json") else { return }
+        guard let path = Bundle.main.path(forResource: "Sample", ofType: "json") else { return }
         let url = URL(fileURLWithPath: path)
         let sampleJsonData = try? Data(contentsOf: url)
+
         do {
             let decode = try JSONDecoder().decode([Sample].self, from: sampleJsonData!)
-            decode.forEach { $0.stick() }
+            // background
+            decode.stickAllWithKey()
+            // main thread
+//            decode.forEach { $0.stick() }
         } catch {
             print(error.localizedDescription)
         }
-        
+    }
+    
+    @IBAction func button_pressed(_ sender: UIButton) {
+        let new = Sample(id: 17, first_name: "Wendy", last_name: "Cat", email: "stinkypoo@gmail.com", gender: "F", ip_address: "")
+        new.stickWithKey()
     }
     
     private func registerForNotifications(for notificationCenter: NotificationCenter, selector: Selector, name: Notification.Name) {
