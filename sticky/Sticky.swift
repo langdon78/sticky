@@ -13,7 +13,7 @@ public class Sticky {
     
     internal var registeredNotifications: [Stickable.Type] = []
     
-    internal var configuration: StickyConfiguration {
+    public var configuration: StickyConfiguration {
         return configurationSettings.configuration
     }
     private var configurationSettings: StickyConfigurationSettings {

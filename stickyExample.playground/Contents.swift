@@ -2,8 +2,11 @@
 
 import UIKit
 import Sticky
+import PlaygroundSupport
 
-let stickyConfig = StickyConfiguration(async: false, logging: true)
+PlaygroundPage.current.needsIndefiniteExecution = true
+
+let stickyConfig = StickyConfiguration(preloadCache: false, clearDirectory: false, async: false, logging: true)
 Sticky.configure(with: .custom(stickyConfig))
 
 enum Rating: Int {
@@ -31,10 +34,37 @@ extension Candy: Equatable {
     }
 }
 
-var snickers = Candy(productId: 1, name: "Snickers", rating: .four)
-snickers.isStored
+var candyBar = Candy(productId: 1, name: "Snickers", rating: .four)
+candyBar.isStored
 
-snickers.stick()
-snickers.isStored
+candyBar.stick()
 
+candyBar.name = "Milky Way"
+
+Candy.read()
+
+extension Candy: StickyKey {
+    struct Key: Equatable {
+        var productId: Int
+
+        static func ==(lhs: Key, rhs: Key) -> Bool {
+            return lhs.productId == rhs.productId
+        }
+    }
+
+    var key: Candy.Key {
+        return Candy.Key(productId: self.productId)
+    }
+}
+
+candyBar.name = "Almond Joy"
+
+candyBar.stickWithKey()
+
+Candy.read()
+
+candyBar.unstick()
+
+Candy.read()
+print(Sticky.shared.configuration.localDirectory)
 
