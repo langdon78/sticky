@@ -30,7 +30,6 @@ extension Candy: Equatable {
 
 Once you conform your object to `Stickable`, all you need to do is instantiate it and call the `stick()` method to persist it.
 
-### Writing
 ```swift
 var candyBar = Candy(productId: 1, name: "Snickers", rating: .four)
 candyBar.stick()
@@ -43,7 +42,7 @@ Want to get your data back out?
 Candy.read()
 //  [{productId: 1, name: "Snickers", rating: 4}]
 ```
-
+### Writing
 If you're following along at home, you also need to define the `Rating` type used above and make sure it's also Codable.
 
 ```swift
@@ -69,12 +68,11 @@ Candy.read()
 //  {productId: 1, name: "Milky Way", rating: 4}
 // ]
 ```
-
+### Updating
 Wait, I didn't want to create a new candy bar, just wanted to update the name...
 
 No problem, just create a `StickyKey`:
 
-### Updating
 ```swift
 extension Candy: StickyKey {
     struct Key: Equatable {
