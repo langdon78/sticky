@@ -11,6 +11,8 @@ Simply define an object in Swift (use your value types!) and conform it to the `
 > Note: In Swift 4.1, conformance will be [synthesized for you](https://github.com/apple/swift-evolution/blob/master/proposals/0185-synthesize-equatable-hashable.md).
 
 ```swift
+import Sticky
+
 struct Candy: Stickable {
     var productId: Int
     var name: String
