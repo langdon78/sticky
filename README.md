@@ -27,7 +27,7 @@ extension Candy: Equatable {
     }
 }
 ```
-
+### Writing
 Once you conform your object to `Stickable`, all you need to do is instantiate it and call the `stick()` method to persist it.
 
 ```swift
@@ -42,7 +42,7 @@ Want to get your data back out?
 Candy.read()
 //  [{productId: 1, name: "Snickers", rating: 4}]
 ```
-### Writing
+### Inserting
 If you're following along at home, you also need to define the `Rating` type used above and make sure it's also Codable.
 
 ```swift
