@@ -78,6 +78,7 @@ internal class Store {
             stickyLog("\(value) deleted")
             notify(from: .stickyDelete, with: [.delete: [value]])
             stored?.saveWithOverwrite()
+            StickyCache.shared.stored = stored
         } else {
             stickyLog("\(value) could not be found")
         }
