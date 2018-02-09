@@ -27,3 +27,9 @@ extension Candy: Equatable {
 }
 ```
 
+Once you conform your object to `Stickable`, all you need to do is instantiate it and call the `stick()` method to persist it.
+
+```swift
+var snickers = Candy(productId: 1, name: "Snickers", rating: .four)
+snickers.stick()
+```
