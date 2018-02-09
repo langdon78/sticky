@@ -6,7 +6,7 @@ import PlaygroundSupport
 
 PlaygroundPage.current.needsIndefiniteExecution = true
 
-let stickyConfig = StickyConfiguration(preloadCache: false, clearDirectory: false, async: false, logging: true)
+let stickyConfig = StickyConfiguration(preloadCache: false, clearDirectory: true, async: false, logging: true)
 Sticky.configure(with: .custom(stickyConfig))
 
 enum Rating: Int {
