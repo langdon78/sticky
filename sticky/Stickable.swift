@@ -1,5 +1,8 @@
 import Foundation
 
+fileprivate let queueNameWrite = "com.sticky.write"
+fileprivate let queueNameWriteAll = "com.sticky.writeAll"
+
 public protocol Stickable: Codable {}
 
 public protocol StickyKey {
@@ -7,16 +10,14 @@ public protocol StickyKey {
     var key: Key { get }
 }
 
-internal typealias Stickyable = Stickable & Equatable & StickyKey
+public typealias Stickyable = Stickable & Equatable & StickyKey
 
 public extension Stickable {
     
     public static func read() -> [Self]? {
         if let data = StickyCache.shared.stored, data is [Self] {
-            print("cache")
             return data as? [Self]
         } else {
-            print("file")
             return Self.decode(from: fileData)
         }
     }
@@ -120,11 +121,8 @@ public extension Stickable where Self: Equatable {
     /// and performance are less concerning. More suited for transactional data.
     ///
     public func stick() {
-        let queue = DispatchQueue(label: "com.sticky.write")
-        queue.sync {
-            stickyLog("\(Self.name) saving without key")
-            self.save()
-        }
+        stickyLog("\(Self.name) saving without key")
+        self.save()
     }
     
     public func unstick() {
@@ -170,9 +168,8 @@ public extension Stickable where Self: Equatable & StickyKey {
 
 public extension Collection where Element: Stickable, Self: Codable {
     internal func saveWithOverwrite() {
-        let queue = DispatchQueue(label: "com.sticky.writeAll")
-        queue.sync {
-            print("write to file")
+        let queue = DispatchQueue(label: queueNameWriteAll)
+        queue.async {
             guard let encodedData = self.encode(self) else { return }
             let path = FileHandler.fullPath(for: Element.self)
             FileHandler.write(data: encodedData, to: path)
@@ -193,8 +190,8 @@ public extension Collection where Element: Stickable, Self: Codable {
 public extension Collection where Element: Stickable & Equatable, Self: Codable {
     public func stickAll() {
         if Sticky.shared.configuration.async {
-            let queue = DispatchQueue(label: "com.sticky.write")
-            queue.async {
+            let queue = DispatchQueue(label: queueNameWrite)
+            queue.sync {
                 self.forEach { savable in
                     savable.stick()
                 }
@@ -206,4 +203,22 @@ public extension Collection where Element: Stickable & Equatable, Self: Codable 
         }
     }
 
+}
+
+public extension Collection where Element: Stickyable, Self: Codable {
+    public func stickAllWithKey() {
+        if Sticky.shared.configuration.async {
+            let queue = DispatchQueue(label: queueNameWrite)
+            queue.async {
+                self.forEach { savable in
+                    savable.stickWithKey()
+                }
+            }
+        } else {
+            self.forEach { savable in
+                savable.stickWithKey()
+            }
+        }
+    }
+    
 }
