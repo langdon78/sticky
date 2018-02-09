@@ -92,6 +92,7 @@
 		BC265F4C1FF953320068422A /* Sticky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticky.swift; sourceTree = "<group>"; };
 		BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyConfiguration.swift; sourceTree = "<group>"; };
 		BCB4328E1FFCDF61009303C7 /* Sample.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Sample.json; sourceTree = "<group>"; };
+		BCBAFE36202DF4A400EA4619 /* stickyExample.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = stickyExample.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		BCE4CC691FFA68B300E55FE5 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Store.swift; path = sticky/Store.swift; sourceTree = SOURCE_ROOT; };
 		BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -133,6 +134,7 @@
 		BC265EAF1FF93B850068422A = {
 			isa = PBXGroup;
 			children = (
+				BCBAFE36202DF4A400EA4619 /* stickyExample.playground */,
 				BC265EBA1FF93B850068422A /* stickyApp */,
 				BC265ECF1FF93B850068422A /* stickyAppTests */,
 				BC265F291FF942C70068422A /* Sticky */,
