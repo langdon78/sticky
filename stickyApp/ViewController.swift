@@ -83,6 +83,23 @@ extension Town: Equatable {
     }
 }
 
+enum Rating: Int, Codable {
+    case one = 1
+    case two
+    case three
+    case four
+}
+
+struct Candy: Stickable, StickyKey, Equatable {
+    typealias Key = Int
+    var key: Key {
+        return productId
+    }
+    var productId: Int
+    var name: String
+    var rating: Rating
+}
+
 class ViewController: UIViewController {
     @IBOutlet weak var notifcationLabel: UILabel!
     
@@ -107,27 +124,52 @@ class ViewController: UIViewController {
             College(name: "Illinois", ranking: 1, city: "Champagne").stickWithKey()
         }
         
-        College.dumpDataStoreToLog()
+//        College.dumpDataStoreToLog()
         
         let chicago = Town(name: "New York", population: 6984298)
         chicago.stick()
         
         let country = Country(name: "Japan")
+//        country.stick()
         country.unstick()
         
-        guard let path = Bundle.main.path(forResource: "Sample", ofType: "json") else { return }
-        let url = URL(fileURLWithPath: path)
-        let sampleJsonData = try? Data(contentsOf: url)
 
-        do {
-            let decode = try JSONDecoder().decode([Sample].self, from: sampleJsonData!)
-            // background
-            decode.stickAllWithKey()
-            // main thread
-//            decode.forEach { $0.stick() }
-        } catch {
-            print(error.localizedDescription)
-        }
+        
+        var candyBar = Candy(productId: 1, name: "Snickers", rating: .four)
+        candyBar.isStored
+        
+        candyBar.stickWithKey()
+        
+        candyBar.name = "Milky Way"
+        
+        Candy.read()
+        
+        candyBar.name = "Almond Joy"
+        
+        candyBar.stickWithKey()
+        
+        Candy.read()
+        
+        candyBar.unstick()
+        
+        
+        print(Sticky.shared.configuration.localDirectory)
+        
+        Candy.read()
+        
+//        guard let path = Bundle.main.path(forResource: "Sample", ofType: "json") else { return }
+//        let url = URL(fileURLWithPath: path)
+//        let sampleJsonData = try? Data(contentsOf: url)
+//
+//        do {
+//            let decode = try JSONDecoder().decode([Sample].self, from: sampleJsonData!)
+//            // background
+//            decode.stickAllWithKey()
+//            // main thread
+////            decode.forEach { $0.stick() }
+//        } catch {
+//            print(error.localizedDescription)
+//        }
     }
     
     @IBAction func button_pressed(_ sender: UIButton) {

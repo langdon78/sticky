@@ -12,10 +12,20 @@ public protocol StickyKey {
 
 public typealias Stickyable = Stickable & Equatable & StickyKey
 
+public extension CodingUserInfoKey {
+    public static let codedTypeKey = CodingUserInfoKey(rawValue: "codedTypeName")!
+}
+
+public extension Decoder {
+    public var codedTypeName: String {
+        return userInfo[CodingUserInfoKey.codedTypeKey] as? String ?? ""
+    }
+}
+
 public extension Stickable {
     
     public static func read() -> [Self]? {
-        if let data = StickyCache.shared.stored, data is [Self] {
+        if let data = StickyCache.shared.stored, !data.isEmpty, data is [Self] {
             return data as? [Self]
         } else {
             return Self.decode(from: fileData)
@@ -80,7 +90,10 @@ public extension Stickable {
         var decoded: [Self]? = nil
         guard let jsonData = data, !jsonData.isEmpty else { return nil }
         do {
-            decoded = try JSONDecoder().decode([Self].self, from: jsonData)
+            let decoder = JSONDecoder()
+            let describedType = String(describing: Self.self)
+            decoder.userInfo = [CodingUserInfoKey.codedTypeKey: describedType]
+            decoded = try decoder.decode([Self].self, from: jsonData)
         } catch {
             print("ERROR: \(name).\(#function) \(error.localizedDescription) Make sure any new data properties are marked as optional.")
             fatalError()
