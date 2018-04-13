@@ -3,7 +3,17 @@ import Foundation
 fileprivate let queueNameWrite = "com.sticky.write"
 fileprivate let queueNameWriteAll = "com.sticky.writeAll"
 
-public protocol Stickable: Codable {}
+public protocol StickyPromise {
+    func after(_ completion: () -> Void)
+}
+
+public extension StickyPromise {
+    func after(_ completion: () -> Void) {
+        completion()
+    }
+}
+
+public protocol Stickable: Codable, StickyPromise {}
 
 public protocol StickyKey {
     associatedtype Key: Equatable
@@ -111,7 +121,7 @@ public extension Stickable {
     }
 }
 
-public extension Stickable where Self: Equatable {
+public extension Stickable where Self: Equatable & StickyPromise {
     // Public API
     ///
     /// Checks to see if data object is stored locally.
@@ -158,7 +168,7 @@ public extension Stickable where Self: Equatable {
 
 //MARK: - Stickable - Equatable & StickyKey
 
-public extension Stickable where Self: Equatable & StickyKey {
+public extension Stickable where Self: Equatable & StickyKey & StickyPromise {
     // Public API
     ///
     /// When data object conforms to StickyKey, this method will seek
@@ -170,12 +180,13 @@ public extension Stickable where Self: Equatable & StickyKey {
     /// Use this method if you have data objects with one or two
     /// properties that ensure uniqueness and need to update values frequently.
     ///
-    public func stickWithKey() {
+    @discardableResult public func stickWithKey() -> StickyPromise {
         stickyLog("\(Self.name) saving with key")
         let index = Self.read()?
                     .map({ $0.key })
                     .index(of: self.key)
         Store.save(value: self, to: Self.read(), at: index)
+        return self as StickyPromise
     }
 }
 
@@ -200,7 +211,7 @@ public extension Collection where Element: Stickable, Self: Codable {
     }
 }
 
-public extension Collection where Element: Stickable & Equatable, Self: Codable {
+public extension Collection where Element: Stickable & Equatable & StickyPromise, Self: Codable {
     public func stickAll() {
         if Sticky.shared.configuration.async {
             let queue = DispatchQueue(label: queueNameWrite)
@@ -218,7 +229,7 @@ public extension Collection where Element: Stickable & Equatable, Self: Codable 
 
 }
 
-public extension Collection where Element: Stickyable, Self: Codable {
+public extension Collection where Element: Stickyable & StickyPromise, Self: Codable {
     public func stickAllWithKey() {
         if Sticky.shared.configuration.async {
             let queue = DispatchQueue(label: queueNameWrite)
@@ -233,5 +244,5 @@ public extension Collection where Element: Stickyable, Self: Codable {
             }
         }
     }
-    
 }
+
