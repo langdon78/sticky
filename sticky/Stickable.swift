@@ -70,22 +70,6 @@ public extension Stickable {
         return String(describing: Self.self)
     }
     
-    public static func registerForNotification() {
-        if !isRegisteredForNotifications {
-            Sticky.shared.registeredNotifications.append(Self.self)
-        }
-    }
-    
-    public static func deregisterForNotification() {
-        if let index = Sticky.shared.registeredNotifications.index(where: { $0 == Self.self} ) {
-            Sticky.shared.registeredNotifications.remove(at: index)
-        }
-    }
-    
-    public static var isRegisteredForNotifications: Bool {
-        return Sticky.shared.registeredNotifications.contains(where: { $0 == Self.self })
-    }
-    
     public static var notificationName: NSNotification.Name {
             return NSNotification.Name(name)
     }
