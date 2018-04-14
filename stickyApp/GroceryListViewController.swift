@@ -10,17 +10,17 @@ class GroceryListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadFromStore()
+        loadGroceryListFromStore()
     }
     
     @IBAction func addButton_pressed(_ sender: UIButton) {
         guard let groceryItemEntry = tfGroceryItem.text, !groceryItemEntry.isEmpty else { return }
-        let groceryItem = GroceryItem(itemName: groceryItemEntry, amount: 1)
+        let groceryItem = GroceryItem(itemName: groceryItemEntry)
         tfGroceryItem.text = nil
         saveAndUpdateList(with: groceryItem)
     }
     
-    func loadFromStore() {
+    func loadGroceryListFromStore() {
         guard let storedList = GroceryItem.read() else { return }
         groceryList = storedList
         tableView.reloadData()
@@ -28,7 +28,7 @@ class GroceryListViewController: UIViewController {
     
     func saveAndUpdateList(with groceryItem: GroceryItem) {
         groceryItem.save()
-        loadFromStore()
+        loadGroceryListFromStore()
     }
 }
 
@@ -42,9 +42,8 @@ extension GroceryListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: groceryListCellName) as? GroceryListTableViewCell else { return UITableViewCell() }
         cell.configure(with: groceryList[indexPath.row])
-        cell.amountChanged = { [unowned self] (amount, itemName) in
-            let updatedItem = GroceryItem(itemName: itemName, amount: amount)
-            self.saveAndUpdateList(with: updatedItem)
+        cell.amountChanged = { [unowned self] (updatedAmountItem) in
+            self.saveAndUpdateList(with: updatedAmountItem)
         }
         return cell
     }

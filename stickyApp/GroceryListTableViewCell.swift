@@ -6,7 +6,7 @@ class GroceryListTableViewCell: UITableViewCell {
     @IBOutlet weak var amount: UILabel!
     @IBOutlet weak var stepper: UIStepper!
     
-    var amountChanged: ((Int, String) -> Void)?
+    var amountChanged: ((GroceryItem) -> Void)?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -27,6 +27,7 @@ class GroceryListTableViewCell: UITableViewCell {
 
     @IBAction func amountStepper(_ sender: UIStepper, forEvent event: UIEvent) {
         guard let groceryItemName = groceryName.text else { return }
-        amountChanged?(Int(sender.value), groceryItemName)
+        let updatedItem = GroceryItem(itemName: groceryItemName, amount: Int(sender.value))
+        amountChanged?(updatedItem)
     }
 }

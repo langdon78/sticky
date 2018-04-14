@@ -1,7 +1,7 @@
 import Foundation
 import Sticky
 
-protocol Saveable: Stickyable {
+protocol Saveable: StickyKeyable {
     var key: String { get }
     
     func save()
@@ -25,4 +25,9 @@ struct GroceryItem: Saveable {
     }
     var itemName: String
     var amount: Int
+    
+    init(itemName: String, amount: Int = 1) {
+        self.itemName = itemName
+        self.amount = amount
+    }
 }
