@@ -20,7 +20,9 @@ public protocol StickyKey {
     var key: Key { get }
 }
 
-public typealias Stickyable = Stickable & Equatable & StickyKey
+public typealias StickyComparable = Stickable & Equatable
+public typealias StickyKeyable = StickyComparable & StickyKey
+public typealias StickyDataSet<T: StickyComparable> = [T]
 
 public extension CodingUserInfoKey {
     public static let codedTypeKey = CodingUserInfoKey(rawValue: "codedTypeName")!
@@ -69,7 +71,7 @@ public extension Stickable {
     }
     
     public static func registerForNotification() {
-        if notificationName == nil {
+        if !isRegisteredForNotifications {
             Sticky.shared.registeredNotifications.append(Self.self)
         }
     }
@@ -81,14 +83,11 @@ public extension Stickable {
     }
     
     public static var isRegisteredForNotifications: Bool {
-        return notificationName != nil
+        return Sticky.shared.registeredNotifications.contains(where: { $0 == Self.self })
     }
     
-    public static var notificationName: NSNotification.Name? {
-        if Sticky.shared.registeredNotifications.contains(where: { $0 == Self.self }) {
+    public static var notificationName: NSNotification.Name {
             return NSNotification.Name(name)
-        }
-        return nil
     }
     
     private static var debugDescription: String {
@@ -105,8 +104,10 @@ public extension Stickable {
             decoder.userInfo = [CodingUserInfoKey.codedTypeKey: describedType]
             decoded = try decoder.decode([Self].self, from: jsonData)
         } catch {
-            print("ERROR: \(name).\(#function) \(error.localizedDescription) Make sure any new data properties are marked as optional.")
-            fatalError()
+            var errorMessage = "ERROR: \(name).\(#function) \(error.localizedDescription) "
+            errorMessage += handleDecodeError(error) ?? ""
+            errorMessage += debugDescription
+            stickyLog(errorMessage)
         }
         StickyCache.shared.stored = decoded
         return decoded
@@ -118,6 +119,16 @@ public extension Stickable {
     
     public static var filePath: String {
         return FileHandler.fullPath(for: Self.self)
+    }
+    
+    private static func handleDecodeError(_ error: Error) -> String? {
+        guard let decodeError = error as? DecodingError else { return nil }
+        switch decodeError {
+        case .keyNotFound(_, let context): return context.debugDescription
+        case .dataCorrupted(let context): return context.debugDescription
+        case .typeMismatch(_, let context): return context.debugDescription
+        case .valueNotFound(_, let context): return context.debugDescription
+        }
     }
 }
 
@@ -162,7 +173,8 @@ public extension Stickable where Self: Equatable & StickyPromise {
     
     fileprivate func save() {
         let index = Self.read()?.index(of: self)
-        Store.save(value: self, to: Self.read(), at: index)
+        let stickyAction = Store.stickyAction(from: Self.read(), with: self, at: index)
+        Store.save(with: stickyAction)
     }
 }
 
@@ -185,7 +197,8 @@ public extension Stickable where Self: Equatable & StickyKey & StickyPromise {
         let index = Self.read()?
                     .map({ $0.key })
                     .index(of: self.key)
-        Store.save(value: self, to: Self.read(), at: index)
+        let stickyAction = Store.stickyAction(from: Self.read(), with: self, at: index)
+        Store.save(with: stickyAction)
         return self as StickyPromise
     }
 }
@@ -229,7 +242,7 @@ public extension Collection where Element: Stickable & Equatable & StickyPromise
 
 }
 
-public extension Collection where Element: Stickyable & StickyPromise, Self: Codable {
+public extension Collection where Element: StickyKeyable & StickyPromise, Self: Codable {
     public func stickAllWithKey() {
         if Sticky.shared.configuration.async {
             let queue = DispatchQueue(label: queueNameWrite)
