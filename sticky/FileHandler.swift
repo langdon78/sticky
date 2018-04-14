@@ -18,14 +18,20 @@ internal class FileHandler {
         return path
     }
     
+    internal static func fileExists(at path: String) -> Bool {
+        let fileManager = FileManager.default
+        return fileManager.fileExists(atPath: path)
+    }
+    
     internal static func read(from path: String) -> Data? {
+        guard fileExists(at: path) else { return nil }
         let url = URL(fileURLWithPath: path)
         do {
             return try Data(contentsOf: url)
         } catch {
             stickyLog("ERROR: \(error.localizedDescription)")
+            return nil
         }
-        return nil
     }
     
     internal static func write(data: Data, to path: String) {
