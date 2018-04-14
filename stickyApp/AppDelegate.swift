@@ -1,11 +1,3 @@
-//
-//  AppDelegate.swift
-//  stickyApp
-//
-//  Created by James Langdon on 12/31/17.
-//  Copyright © 2017 James Langdon. All rights reserved.
-//
-
 import UIKit
 import Sticky
 
@@ -17,7 +9,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        let stickyConfig = StickyConfiguration(async: true, logging: true)
+        let stickyConfig = StickyConfiguration(async: true, logging: false)
         Sticky.configure(with: .custom(stickyConfig))
         
         return true
