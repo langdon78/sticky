@@ -5,12 +5,17 @@ protocol Saveable: StickyKeyable {
     
     associatedtype Key
     var key: Key { get }
+    static var storedData: [Self] { get }
     
     func save()
     func delete()
 }
 
 extension Saveable {
+    
+    static var storedData: [Self] {
+        return self.read() ?? []
+    }
     
     func save() {
         self.stickWithKey()

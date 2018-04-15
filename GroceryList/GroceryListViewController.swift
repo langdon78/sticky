@@ -35,8 +35,7 @@ class GroceryListViewController: UIViewController {
     }
     
     private func loadGroceryListFromStore() {
-        guard let storedList = GroceryItem.read() else { return }
-        groceryList = storedList
+        groceryList = GroceryItem.storedData
         tableView.reloadData()
     }
     
