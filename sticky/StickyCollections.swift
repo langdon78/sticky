@@ -6,7 +6,7 @@ fileprivate let queueNameWriteAll = "com.sticky.writeAll"
 public extension Collection where Element: Stickable, Self: Codable {
     internal func saveWithOverwrite() {
         guard let dataSet = self as? [Stickable] else { return }
-        cache.stored.updateValue(dataSet, forKey: String(describing: Element.self))
+        cache.stored.updateValue(dataSet, forKey: Element.entityName)
         queueToFile()
     }
     

@@ -106,7 +106,7 @@ internal class Store {
             stickyLog("Created new file for \(value))")
             NotificationCenter.stickyCreate.post(name: StickyElement.notificationName, object: nil, userInfo: [action: [value]])
         default:
-            stickyLog("\(StickyElement.name): No action taken")
+            stickyLog("\(StickyElement.entityName): No action taken")
         }
         
     }
