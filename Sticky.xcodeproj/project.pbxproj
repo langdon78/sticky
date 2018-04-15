@@ -141,8 +141,8 @@
 			isa = PBXGroup;
 			children = (
 				BCBAFE36202DF4A400EA4619 /* stickyExample.playground */,
-				BC265EBA1FF93B850068422A /* stickyApp */,
-				BC265ECF1FF93B850068422A /* stickyAppTests */,
+				BC265EBA1FF93B850068422A /* GroceryList */,
+				BC265ECF1FF93B850068422A /* GroceryListTests */,
 				BC265F291FF942C70068422A /* Sticky */,
 				BC265F361FF942C70068422A /* StickyTests */,
 				BC265EB91FF93B850068422A /* Products */,
@@ -160,7 +160,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		BC265EBA1FF93B850068422A /* stickyApp */ = {
+		BC265EBA1FF93B850068422A /* GroceryList */ = {
 			isa = PBXGroup;
 			children = (
 				BCA74EDA2082B1CE0087F9BF /* Resources */,
@@ -170,16 +170,16 @@
 				BCA74ED6208138460087F9BF /* GroceryListTableViewCell.swift */,
 				BCA74ED82081390B0087F9BF /* GroceryItem.swift */,
 			);
-			path = stickyApp;
+			path = GroceryList;
 			sourceTree = "<group>";
 		};
-		BC265ECF1FF93B850068422A /* stickyAppTests */ = {
+		BC265ECF1FF93B850068422A /* GroceryListTests */ = {
 			isa = PBXGroup;
 			children = (
 				BC265ED01FF93B850068422A /* stickyAppTests.swift */,
 				BC265ED21FF93B850068422A /* Info.plist */,
 			);
-			path = stickyAppTests;
+			path = GroceryListTests;
 			sourceTree = "<group>";
 		};
 		BC265F291FF942C70068422A /* Sticky */ = {
@@ -335,7 +335,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BC265EB31FF93B850068422A /* Build configuration list for PBXProject "stickyApp" */;
+			buildConfigurationList = BC265EB31FF93B850068422A /* Build configuration list for PBXProject "Sticky" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -596,9 +596,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 23WM9XXG5V;
-				INFOPLIST_FILE = "$(SRCROOT)/stickyApp/Resources/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/GroceryList/Resources/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.corporatelangdon.stickyApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.corporatelangdon.GroceryList;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -612,9 +612,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 23WM9XXG5V;
-				INFOPLIST_FILE = "$(SRCROOT)/stickyApp/Resources/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/GroceryList/Resources/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.corporatelangdon.stickyApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.corporatelangdon.GroceryList;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -741,7 +741,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BC265EB31FF93B850068422A /* Build configuration list for PBXProject "stickyApp" */ = {
+		BC265EB31FF93B850068422A /* Build configuration list for PBXProject "Sticky" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BC265ED31FF93B850068422A /* Debug */,
