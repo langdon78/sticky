@@ -1,9 +1,13 @@
 {
     "version": 2,
     "propertyUpdate": {
-        "amount": "quantity"
+        "FoodItem": {
+            "amount": "quantity"
+        }
     },
     "newProperty": {
-        "store": "Walmart"
+        "FoodItem": {
+            "store": "Walmart"
+        }
     }
 }

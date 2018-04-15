@@ -5,7 +5,8 @@ class StoredDataSchemaUpdater {
     fileprivate static let schemaFileExtension = "json"
     // Set [{version}: {fileName}]
     fileprivate static let fileVersionMap: [Int: String] = [
-        1:"sticky_schema_1"
+        1: "sticky_schema_1",
+        2: "sticky_schema_2"
     ]
     
     fileprivate static var schemaFiles: [StickySchemaFile] {
@@ -18,6 +19,7 @@ class StoredDataSchemaUpdater {
                     ) else { return nil }
                 return StickySchemaFile(version: fileVersion.key, fileUrl: url)
         }
+            .filter { $0.version > Sticky.shared.currentSchemaVersion }
     }
     
     fileprivate static var maxVersion: Int {

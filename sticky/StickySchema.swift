@@ -55,6 +55,28 @@ public class StickySchema {
             }
             Sticky.shared.incrementSchemaVersion(to: version)
         }
+        
+        // Update property name
+        if let propertyUpdate = dict["propertyUpdate"] as? [String: Any] {
+            for entity in propertyUpdate {
+                if let properties = entity.value as? [String: String] {
+                    for (oldName, newName) in properties {
+                        print("Changed \(entity.key) property name from \"\(oldName)\" to \"\(newName)\"")
+                    }
+                }
+            }
+        }
+        
+        // Add new property
+        if let propertyUpdate = dict["newProperty"] as? [String: Any] {
+            for entity in propertyUpdate {
+                if let properties = entity.value as? [String: String] {
+                    for (name, defaultValue) in properties {
+                        print("Added property \"\(name)\" to \(entity.key) with default value of \"\(defaultValue)\"")
+                    }
+                }
+            }
+        }
     }
     
     public static func processUpdates(for schemaFiles: [StickySchemaFile]) {
