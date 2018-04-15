@@ -27,6 +27,7 @@ internal class FileHandler {
         guard fileExists(at: path) else { return nil }
         let url = URL(fileURLWithPath: path)
         do {
+            stickyLog("Read from file")
             return try Data(contentsOf: url)
         } catch {
             stickyLog("ERROR: \(error.localizedDescription)")
@@ -37,6 +38,7 @@ internal class FileHandler {
     internal static func write(data: Data, to path: String) {
         do {
             try data.write(to: URL(fileURLWithPath: path))
+            stickyLog("File updated")
         } catch let error {
             print(error.localizedDescription)
         }
