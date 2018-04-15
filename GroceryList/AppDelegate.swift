@@ -9,17 +9,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        let stickyConfig = StickyConfiguration(async: true, logging: true)
+        let stickyConfig = StickyConfiguration(async: true, logging: true, rollbackToSchemaVersion: nil)
         Sticky.configure(with: .custom(stickyConfig))
-        performSchemaUpdates()
+        StoredDataSchemaUpdater.processUpdates()
+        
         return true
-    }
-    
-    func performSchemaUpdates() {
-        let bundle = Bundle.main
-        guard let fileUrl = bundle.url(forResource: "sticky_schema_2", withExtension: "json") else { return }
-        let stickyFile = StickySchemaFile(version: 2, fileUrl: fileUrl)
-        guard let stickySchema = StickySchema.readSchemaFile(stickyFile) else { return }
-        stickySchema.process()
     }
 }
