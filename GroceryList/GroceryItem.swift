@@ -26,7 +26,7 @@ extension Saveable {
     }
 }
 
-struct GroceryItem: Saveable {
+struct FoodItem: Saveable {
     
     var key: String {
         return itemName
