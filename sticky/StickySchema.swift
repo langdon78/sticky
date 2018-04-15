@@ -61,6 +61,7 @@ public class StickySchema {
             for entity in propertyUpdate {
                 if let properties = entity.value as? [String: String] {
                     for (oldName, newName) in properties {
+                        let _ = renameProperty(for: entity.key, from: oldName, to: newName)
                         print("Changed \(entity.key) property name from \"\(oldName)\" to \"\(newName)\"")
                     }
                 }
@@ -72,11 +73,53 @@ public class StickySchema {
             for entity in propertyUpdate {
                 if let properties = entity.value as? [String: String] {
                     for (name, defaultValue) in properties {
+                        addProperty(name, for: entity.key, with: defaultValue)
                         print("Added property \"\(name)\" to \(entity.key) with default value of \"\(defaultValue)\"")
                     }
                 }
             }
         }
+    }
+    
+    public func renameProperty(for entityName: String, from oldName: String, to newName: String) -> Bool {
+        let filePath = FileHandler.url(for: entityName).path
+        guard let data = FileHandler.read(from: filePath) else { return false }
+        let json = try? JSONSerialization.jsonObject(with: data, options: [])
+        guard let dict = json as? [[String: Any]] else {
+            stickyLog("ERROR: Can not parse JSON file \(filePath)")
+            return false
+        }
+        var result: [[String: Any]] = []
+        for var item in dict {
+            if let property = item[oldName] {
+                item.removeValue(forKey: oldName)
+                item.updateValue(property, forKey: newName)
+            }
+            result.append(item)
+        }
+        guard let newData = try? JSONSerialization.data(withJSONObject: result, options: []) else { return false }
+        FileHandler.write(data: newData, to: filePath)
+        print(result)
+        return false
+    }
+    
+    public func addProperty(_ property: String, for entityName: String, with defaultValue: Any) -> Bool {
+        let filePath = FileHandler.url(for: entityName).path
+        guard let data = FileHandler.read(from: filePath) else { return false }
+        let json = try? JSONSerialization.jsonObject(with: data, options: [])
+        guard let dict = json as? [[String: Any]] else {
+            stickyLog("ERROR: Can not parse JSON file \(filePath)")
+            return false
+        }
+        var result: [[String: Any]] = []
+        for var item in dict {
+            item.updateValue(defaultValue, forKey: property)
+            result.append(item)
+        }
+        guard let newData = try? JSONSerialization.data(withJSONObject: result, options: []) else { return false }
+        FileHandler.write(data: newData, to: filePath)
+        print(result)
+        return false
     }
     
     public static func processUpdates(for schemaFiles: [StickySchemaFile]) {

@@ -71,7 +71,7 @@ class GroceryListViewController: UIViewController {
         case .insert:
             stickyMessage += "Inserted \(item.itemName) into \(type(of: item)) data store"
         case .update:
-            stickyMessage += "\(item.itemName) amount updated from \(String(describing: item.amount) ) to \(String(describing: newValue!.amount)) in \(type(of: item)) data store"
+            stickyMessage += "\(item.itemName) amount updated from \(String(describing: item.quantity) ) to \(String(describing: newValue!.quantity)) in \(type(of: item)) data store"
         case .create:
             stickyMessage += "Created new data set for \(type(of: item)) and inserted \(item.itemName)"
         case .delete:
