@@ -8,7 +8,7 @@ Use Sticky to quickly persist common Swift objects using the Swift 4 `Codable` t
 
 ### Setup
 Simply define an object in Swift (use your value types!) and conform it to the `Stickable` protocol. In order to take full advantage of **Sticky**, make sure to add `Equatable` conformance to your object as well. 
-> Note: In Swift 4.1, conformance will be [synthesized for you](https://github.com/apple/swift-evolution/blob/master/proposals/0185-synthesize-equatable-hashable.md).
+> Note: In Swift 4.1, conformance can be [synthesized for you](https://github.com/apple/swift-evolution/blob/master/proposals/0185-synthesize-equatable-hashable.md).
 
 ```swift
 import Sticky
