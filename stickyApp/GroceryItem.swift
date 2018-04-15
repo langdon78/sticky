@@ -2,13 +2,16 @@ import Foundation
 import Sticky
 
 protocol Saveable: StickyKeyable {
-    var key: String { get }
+    
+    associatedtype Key
+    var key: Key { get }
     
     func save()
     func delete()
 }
 
 extension Saveable {
+    
     func save() {
         self.stickWithKey()
     }
@@ -19,8 +22,8 @@ extension Saveable {
 }
 
 struct GroceryItem: Saveable {
-    typealias Key = String
-    var key: Key {
+    
+    var key: String {
         return itemName
     }
     var itemName: String

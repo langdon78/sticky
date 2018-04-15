@@ -186,14 +186,14 @@
 			isa = PBXGroup;
 			children = (
 				BC265F2B1FF942C70068422A /* Info.plist */,
-				BC265F4A1FF9523A0068422A /* FileHandler.swift */,
-				BC265F481FF9438F0068422A /* Stickable.swift */,
 				BC265F4C1FF953320068422A /* Sticky.swift */,
-				BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */,
 				BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */,
-				BCE4CC691FFA68B300E55FE5 /* Store.swift */,
-				BCB48C412082D6C100A57B96 /* StickyCollections.swift */,
 				BCB48C432082D84F00A57B96 /* Interface.swift */,
+				BC265F481FF9438F0068422A /* Stickable.swift */,
+				BCB48C412082D6C100A57B96 /* StickyCollections.swift */,
+				BCE4CC691FFA68B300E55FE5 /* Store.swift */,
+				BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */,
+				BC265F4A1FF9523A0068422A /* FileHandler.swift */,
 			);
 			path = Sticky;
 			sourceTree = "<group>";
