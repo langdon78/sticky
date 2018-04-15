@@ -18,6 +18,7 @@ public class Sticky {
             return UserDefaults.standard.integer(forKey: userDefaultsSchemaVersionKey)
         }
         set {
+            stickyLog("Version changed from \(currentSchemaVersion) to \(newValue)")
             UserDefaults.standard.set(newValue, forKey: userDefaultsSchemaVersionKey)
         }
     }
@@ -42,14 +43,17 @@ public class Sticky {
     
     public static func configure(with config: StickyConfigurationSettings) {
         Sticky.shared.configurationSettings = config
+        if let rollback = config.configuration.rollbackToSchemaVersion {
+            Sticky.shared.incrementSchemaVersion(to: rollback)
+        }
     }
     
     private func clearContentsOfDirectory() {
         FileHandler.clear()
     }
     
-    internal func incrementSchemaVersion() {
-        currentSchemaVersion += 1
+    internal func incrementSchemaVersion(to version: Int) {
+        currentSchemaVersion = version
     }
 }
 
@@ -68,7 +72,8 @@ public enum StickyConfigurationSettings {
                 fileExtensionName: configuration.fileExtensionName,
                 clearDirectory: configuration.clearDirectory,
                 async: configuration.async,
-                logging: configuration.logging
+                logging: configuration.logging,
+                rollbackToSchemaVersion: configuration.rollbackToSchemaVersion
             )
         }
     }

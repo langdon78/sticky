@@ -9,6 +9,7 @@ public struct StickyConfiguration {
     public let clearDirectory: Bool
     public let async: Bool
     public let logging: Bool
+    public let rollbackToSchemaVersion: Int?
     
     public init(
         localDirectory: URL = try!
@@ -23,7 +24,8 @@ public struct StickyConfiguration {
         clearDirectory: Bool = false,
         async: Bool = false,
         logging: Bool = false,
-        schemaVersion: Int = 1
+        schemaVersion: Int = 1,
+        rollbackToSchemaVersion: Int? = nil
         ) {
         self.localDirectory = localDirectory
         self.preloadCache = preloadCache
@@ -31,5 +33,6 @@ public struct StickyConfiguration {
         self.clearDirectory = clearDirectory
         self.async = async
         self.logging = logging
+        self.rollbackToSchemaVersion = rollbackToSchemaVersion
     }
 }
