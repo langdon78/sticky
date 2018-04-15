@@ -1,6 +1,9 @@
 {
     "version": 2,
-    "entityNameUpdate": {
-        "GroceryItem": "FoodItem"
+    "propertyUpdate": {
+        "amount": "quantity"
+    },
+    "newProperty": {
+        "store": "Walmart"
     }
 }
