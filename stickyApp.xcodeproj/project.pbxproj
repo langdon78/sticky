@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BC265EBC1FF93B850068422A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265EBB1FF93B850068422A /* AppDelegate.swift */; };
-		BC265EBE1FF93B850068422A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265EBD1FF93B850068422A /* ViewController.swift */; };
+		BC265EBE1FF93B850068422A /* GroceryListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265EBD1FF93B850068422A /* GroceryListViewController.swift */; };
 		BC265EC11FF93B850068422A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BC265EBF1FF93B850068422A /* Main.storyboard */; };
 		BC265EC31FF93B850068422A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BC265EC21FF93B850068422A /* Assets.xcassets */; };
 		BC265EC61FF93B850068422A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BC265EC41FF93B850068422A /* LaunchScreen.storyboard */; };
@@ -21,7 +21,10 @@
 		BC265F4B1FF9523A0068422A /* FileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F4A1FF9523A0068422A /* FileHandler.swift */; };
 		BC265F4D1FF953320068422A /* Sticky.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F4C1FF953320068422A /* Sticky.swift */; };
 		BC265F4F1FF953CF0068422A /* StickyConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */; };
-		BCB4328F1FFCDF61009303C7 /* Sample.json in Resources */ = {isa = PBXBuildFile; fileRef = BCB4328E1FFCDF61009303C7 /* Sample.json */; };
+		BCA74ED7208138460087F9BF /* GroceryListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA74ED6208138460087F9BF /* GroceryListTableViewCell.swift */; };
+		BCA74ED92081390B0087F9BF /* GroceryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA74ED82081390B0087F9BF /* GroceryItem.swift */; };
+		BCB48C422082D6C100A57B96 /* StickyCollections.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB48C412082D6C100A57B96 /* StickyCollections.swift */; };
+		BCB48C442082D84F00A57B96 /* Interface.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB48C432082D84F00A57B96 /* Interface.swift */; };
 		BCE4CC6A1FFA68B300E55FE5 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE4CC691FFA68B300E55FE5 /* Store.swift */; };
 		BCE4CC6C1FFA69AF00E55FE5 /* StickyCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */; };
 /* End PBXBuildFile section */
@@ -74,7 +77,7 @@
 /* Begin PBXFileReference section */
 		BC265EB81FF93B850068422A /* stickyApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = stickyApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC265EBB1FF93B850068422A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		BC265EBD1FF93B850068422A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		BC265EBD1FF93B850068422A /* GroceryListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListViewController.swift; sourceTree = "<group>"; };
 		BC265EC01FF93B850068422A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		BC265EC21FF93B850068422A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BC265EC51FF93B850068422A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -91,7 +94,11 @@
 		BC265F4A1FF9523A0068422A /* FileHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandler.swift; sourceTree = "<group>"; };
 		BC265F4C1FF953320068422A /* Sticky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticky.swift; sourceTree = "<group>"; };
 		BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyConfiguration.swift; sourceTree = "<group>"; };
-		BCB4328E1FFCDF61009303C7 /* Sample.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Sample.json; sourceTree = "<group>"; };
+		BCA74ED6208138460087F9BF /* GroceryListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListTableViewCell.swift; sourceTree = "<group>"; };
+		BCA74ED82081390B0087F9BF /* GroceryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryItem.swift; sourceTree = "<group>"; };
+		BCB48C412082D6C100A57B96 /* StickyCollections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StickyCollections.swift; path = sticky/StickyCollections.swift; sourceTree = SOURCE_ROOT; };
+		BCB48C432082D84F00A57B96 /* Interface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interface.swift; sourceTree = "<group>"; };
+		BCBAFE36202DF4A400EA4619 /* stickyExample.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = stickyExample.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		BCE4CC691FFA68B300E55FE5 /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Store.swift; path = sticky/Store.swift; sourceTree = SOURCE_ROOT; };
 		BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -133,6 +140,7 @@
 		BC265EAF1FF93B850068422A = {
 			isa = PBXGroup;
 			children = (
+				BCBAFE36202DF4A400EA4619 /* stickyExample.playground */,
 				BC265EBA1FF93B850068422A /* stickyApp */,
 				BC265ECF1FF93B850068422A /* stickyAppTests */,
 				BC265F291FF942C70068422A /* Sticky */,
@@ -155,13 +163,12 @@
 		BC265EBA1FF93B850068422A /* stickyApp */ = {
 			isa = PBXGroup;
 			children = (
-				BCB4328E1FFCDF61009303C7 /* Sample.json */,
+				BCA74EDA2082B1CE0087F9BF /* Resources */,
 				BC265EBB1FF93B850068422A /* AppDelegate.swift */,
-				BC265EBD1FF93B850068422A /* ViewController.swift */,
 				BC265EBF1FF93B850068422A /* Main.storyboard */,
-				BC265EC21FF93B850068422A /* Assets.xcassets */,
-				BC265EC41FF93B850068422A /* LaunchScreen.storyboard */,
-				BC265EC71FF93B850068422A /* Info.plist */,
+				BC265EBD1FF93B850068422A /* GroceryListViewController.swift */,
+				BCA74ED6208138460087F9BF /* GroceryListTableViewCell.swift */,
+				BCA74ED82081390B0087F9BF /* GroceryItem.swift */,
 			);
 			path = stickyApp;
 			sourceTree = "<group>";
@@ -179,12 +186,14 @@
 			isa = PBXGroup;
 			children = (
 				BC265F2B1FF942C70068422A /* Info.plist */,
-				BC265F4A1FF9523A0068422A /* FileHandler.swift */,
-				BC265F481FF9438F0068422A /* Stickable.swift */,
 				BC265F4C1FF953320068422A /* Sticky.swift */,
-				BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */,
 				BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */,
+				BCB48C432082D84F00A57B96 /* Interface.swift */,
+				BC265F481FF9438F0068422A /* Stickable.swift */,
+				BCB48C412082D6C100A57B96 /* StickyCollections.swift */,
 				BCE4CC691FFA68B300E55FE5 /* Store.swift */,
+				BCE4CC6B1FFA69AF00E55FE5 /* StickyCache.swift */,
+				BC265F4A1FF9523A0068422A /* FileHandler.swift */,
 			);
 			path = Sticky;
 			sourceTree = "<group>";
@@ -196,6 +205,16 @@
 				BC265F391FF942C70068422A /* Info.plist */,
 			);
 			path = StickyTests;
+			sourceTree = "<group>";
+		};
+		BCA74EDA2082B1CE0087F9BF /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				BC265EC21FF93B850068422A /* Assets.xcassets */,
+				BC265EC71FF93B850068422A /* Info.plist */,
+				BC265EC41FF93B850068422A /* LaunchScreen.storyboard */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -292,7 +311,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0920;
-				LastUpgradeCheck = 0920;
+				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = "James Langdon";
 				TargetAttributes = {
 					BC265EB71FF93B850068422A = {
@@ -343,7 +362,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC265EC61FF93B850068422A /* LaunchScreen.storyboard in Resources */,
-				BCB4328F1FFCDF61009303C7 /* Sample.json in Resources */,
 				BC265EC31FF93B850068422A /* Assets.xcassets in Resources */,
 				BC265EC11FF93B850068422A /* Main.storyboard in Resources */,
 			);
@@ -377,8 +395,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC265EBE1FF93B850068422A /* ViewController.swift in Sources */,
+				BC265EBE1FF93B850068422A /* GroceryListViewController.swift in Sources */,
+				BCA74ED7208138460087F9BF /* GroceryListTableViewCell.swift in Sources */,
 				BC265EBC1FF93B850068422A /* AppDelegate.swift in Sources */,
+				BCA74ED92081390B0087F9BF /* GroceryItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,6 +417,8 @@
 				BCE4CC6A1FFA68B300E55FE5 /* Store.swift in Sources */,
 				BC265F4D1FF953320068422A /* Sticky.swift in Sources */,
 				BC265F4F1FF953CF0068422A /* StickyConfiguration.swift in Sources */,
+				BCB48C442082D84F00A57B96 /* Interface.swift in Sources */,
+				BCB48C422082D6C100A57B96 /* StickyCollections.swift in Sources */,
 				BC265F4B1FF9523A0068422A /* FileHandler.swift in Sources */,
 				BC265F491FF9438F0068422A /* Stickable.swift in Sources */,
 				BCE4CC6C1FFA69AF00E55FE5 /* StickyCache.swift in Sources */,
@@ -470,6 +492,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -477,6 +500,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -527,6 +551,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -534,6 +559,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -570,7 +596,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 23WM9XXG5V;
-				INFOPLIST_FILE = stickyApp/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/stickyApp/Resources/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.corporatelangdon.stickyApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -586,7 +612,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 23WM9XXG5V;
-				INFOPLIST_FILE = stickyApp/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/stickyApp/Resources/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.corporatelangdon.stickyApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";

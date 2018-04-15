@@ -1,44 +1,128 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Grocery List View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="stickyApp" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="GroceryListViewController" customModule="stickyApp" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mey-RC-gDS">
-                                <rect key="frame" x="16" y="27" width="343" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="HKr-p8-LAw">
+                                <rect key="frame" x="16" y="48" width="309" height="30"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                 <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WiI-Sl-4fB">
-                                <rect key="frame" x="16" y="96" width="46" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="words" enablesReturnKeyAutomatically="YES"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Hm-N4-qQt">
+                                <rect key="frame" x="330" y="48" width="36" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="36" id="awg-YY-d8n"/>
+                                </constraints>
+                                <state key="normal" title="Add"/>
                                 <connections>
-                                    <action selector="button_pressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="K2M-X8-kBR"/>
+                                    <action selector="addButton_pressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="8Nx-5h-zVi"/>
                                 </connections>
                             </button>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="dXO-F0-ns4">
+                                <rect key="frame" x="0.0" y="86" width="375" height="581"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cell" id="2xc-tg-RoT" customClass="GroceryListTableViewCell" customModule="stickyApp" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="2xc-tg-RoT" id="XWg-Ma-dVS">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minimumValue="1" maximumValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="Bes-4e-3Ky">
+                                                    <rect key="frame" x="210.5" y="7" width="94" height="29"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="94" id="Zqg-ho-Ygi"/>
+                                                    </constraints>
+                                                    <connections>
+                                                        <action selector="amountStepper:forEvent:" destination="2xc-tg-RoT" eventType="valueChanged" id="fki-ur-EmK"/>
+                                                    </connections>
+                                                </stepper>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2zn-Ia-IDc">
+                                                    <rect key="frame" x="30" y="11" width="166.5" height="21"/>
+                                                    <fontDescription key="fontDescription" name="ChalkboardSE-Regular" family="Chalkboard SE" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sjn-Lx-7MK">
+                                                    <rect key="frame" x="336" y="11" width="24" height="21"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="24" id="3bH-w8-DgC"/>
+                                                    </constraints>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="2zn-Ia-IDc" firstAttribute="top" secondItem="XWg-Ma-dVS" secondAttribute="top" constant="11" id="55d-GN-HFU"/>
+                                                <constraint firstItem="2zn-Ia-IDc" firstAttribute="leading" secondItem="XWg-Ma-dVS" secondAttribute="leading" constant="30" id="96E-tD-fYu"/>
+                                                <constraint firstItem="sjn-Lx-7MK" firstAttribute="leading" secondItem="Bes-4e-3Ky" secondAttribute="trailing" constant="31.5" id="BfB-nZ-J3B"/>
+                                                <constraint firstItem="Bes-4e-3Ky" firstAttribute="top" secondItem="XWg-Ma-dVS" secondAttribute="top" constant="7" id="C2R-A0-WyS"/>
+                                                <constraint firstAttribute="trailing" secondItem="sjn-Lx-7MK" secondAttribute="trailing" constant="15" id="Cf6-fh-Bx4"/>
+                                                <constraint firstItem="Bes-4e-3Ky" firstAttribute="leading" secondItem="2zn-Ia-IDc" secondAttribute="trailing" constant="14" id="Qvb-EN-TWS"/>
+                                                <constraint firstAttribute="bottom" secondItem="sjn-Lx-7MK" secondAttribute="bottom" constant="11.5" id="b8p-Uq-ZrM"/>
+                                                <constraint firstAttribute="bottom" secondItem="2zn-Ia-IDc" secondAttribute="bottom" constant="11.5" id="bcd-Uc-lRh"/>
+                                                <constraint firstAttribute="bottom" secondItem="Bes-4e-3Ky" secondAttribute="bottom" constant="7.5" id="wlR-mQ-vp5"/>
+                                                <constraint firstItem="sjn-Lx-7MK" firstAttribute="top" secondItem="XWg-Ma-dVS" secondAttribute="top" constant="11" id="xEi-5H-vTB"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="amount" destination="sjn-Lx-7MK" id="1xI-Rz-aPG"/>
+                                            <outlet property="groceryName" destination="2zn-Ia-IDc" id="eqD-Gy-owZ"/>
+                                            <outlet property="stepper" destination="Bes-4e-3Ky" id="T47-gb-qcD"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="Fm0-D9-UPO"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="K8M-ct-vqj"/>
+                                </connections>
+                            </tableView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Grocery List" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0yY-sy-hnK">
+                                <rect key="frame" x="16" y="20" width="343" height="20.5"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                <color key="textColor" red="0.16036882999999999" green="0.32964816689999998" blue="0.6367078424" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="0yY-sy-hnK" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="07c-Se-meo"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="dXO-F0-ns4" secondAttribute="trailing" id="4LS-sL-DIu"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="dXO-F0-ns4" secondAttribute="bottom" id="AhI-IQ-cMg"/>
+                            <constraint firstItem="4Hm-N4-qQt" firstAttribute="leading" secondItem="HKr-p8-LAw" secondAttribute="trailing" constant="5" id="CbQ-5X-vWD"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="4Hm-N4-qQt" secondAttribute="trailing" constant="9" id="LtH-dd-XCA"/>
+                            <constraint firstItem="HKr-p8-LAw" firstAttribute="top" secondItem="0yY-sy-hnK" secondAttribute="bottom" constant="8" id="PGo-Wd-yQE"/>
+                            <constraint firstItem="HKr-p8-LAw" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="adM-nx-jMZ"/>
+                            <constraint firstItem="dXO-F0-ns4" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="fNi-d0-Kh8"/>
+                            <constraint firstItem="0yY-sy-hnK" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="oBZ-Xa-22l"/>
+                            <constraint firstItem="4Hm-N4-qQt" firstAttribute="top" secondItem="0yY-sy-hnK" secondAttribute="bottom" constant="8" id="u0y-d8-VvU"/>
+                            <constraint firstItem="dXO-F0-ns4" firstAttribute="top" secondItem="HKr-p8-LAw" secondAttribute="bottom" constant="8" id="uie-3w-110"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="0yY-sy-hnK" secondAttribute="trailing" constant="16" id="uvT-eF-G1f"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
-                        <outlet property="notifcationLabel" destination="Mey-RC-gDS" id="I6a-UA-S5I"/>
+                        <outlet property="tableView" destination="dXO-F0-ns4" id="YR9-PP-D5b"/>
+                        <outlet property="tfGroceryItem" destination="HKr-p8-LAw" id="eAa-Sv-Igo"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

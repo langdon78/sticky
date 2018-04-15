@@ -1,26 +1,33 @@
 import Foundation
 
 internal protocol Savable {
+    
     associatedtype Object: Stickable
     func save()
+    
 }
 
 public extension NotificationCenter {
+    
     static let stickyInsert = NotificationCenter()
     static let stickyUpdate = NotificationCenter()
     static let stickyCreate = NotificationCenter()
     static let stickyDelete = NotificationCenter()
+    
 }
 
-public enum Action {
-    case insert
-    case update(Int)
-    case create
+public enum Action<StickyElement: StickyComparable>: Equatable {
+    
+    case insert(StickyElement, StickyDataSet<StickyElement>)
+    case update(Int, StickyElement, StickyDataSet<StickyElement>)
+    case create(StickyElement)
     case delete
     case none
+    
 }
 
 extension Action: Hashable {
+    
     public var hashValue: Int {
         switch self {
         case .insert: return 0
@@ -30,9 +37,11 @@ extension Action: Hashable {
         case .none: return 4
         }
     }
+    
 }
 
 extension Action: CustomStringConvertible {
+    
     public var description: String {
         switch self {
         case .insert: return "Insert"
@@ -42,75 +51,63 @@ extension Action: CustomStringConvertible {
         case .none: return "No Action"
         }
     }
-}
-
-extension Action: Equatable {
-    public static func ==(lhs: Action, rhs: Action) -> Bool {
-        switch (lhs,rhs) {
-        case (.update(let a), .update(let b)):
-            return a == b
-        default:
-            return lhs.hashValue == rhs.hashValue
-        }
-    }
+    
 }
 
 internal class Store {
-    private static func getAction<T: Stickable & Equatable>(from stored: [T]?, with value: T, at index: Int?) -> Action {
-        if let objects = stored {
-            if let index = index {
-                if objects[index] != value {
-                    return .update(index)
-                }
-            } else {
-                return .insert
-            }
-        } else {
-            return .create
-        }
+    
+    internal static func stickyAction<StickyElement: StickyComparable>(
+            from stored: StickyDataSet<StickyElement>?,
+            with value: StickyElement,
+            at index: Int?) -> Action<StickyElement> {
+        
+        guard let objects = stored else { return .create(value) }
+        guard let index = index else { return .insert(value, objects) }
+        guard objects[index] == value else { return .update(index, value, objects) }
         return .none
+        
     }
     
-    internal static func remove<T: Stickable & Equatable>(value: T, from dataSet: [T]?, at index: Int?) {
-        var stored = dataSet
+    internal static func remove<StickyElement: StickyComparable>(
+            value: StickyElement,
+            from dataSet: StickyDataSet<StickyElement>?,
+            at index: Int?) {
+        
+        guard var dataSet = dataSet else { return }
         if let index = index {
-            stored?.remove(at: index)
+            dataSet.remove(at: index)
+            dataSet.saveWithOverwrite()
             stickyLog("\(value) deleted")
-            notify(from: .stickyDelete, with: [.delete: [value]])
-            stored?.saveWithOverwrite()
+            let userInfo: [Action<StickyElement>: Any] = [.delete: [value]]
+            NotificationCenter.stickyDelete.post(name: StickyElement.notificationName, object: nil, userInfo: userInfo)
         } else {
             stickyLog("\(value) could not be found")
         }
+        
     }
     
-    internal static func save<T: Stickable & Equatable>(value: T, to dataSet: [T]?, at index: Int?) {
-        let action = getAction(from: dataSet, with: value, at: index)
-        var stored = dataSet
+    internal static func save<StickyElement: StickyComparable>(with action: Action<StickyElement>) {
+        
         switch action {
-        case .insert:
-            stored?.append(value)
+        case .insert(let value, var dataSet):
+            dataSet.append(value)
+            dataSet.saveWithOverwrite()
             stickyLog("\(value) inserted")
-            stored?.saveWithOverwrite()
-            notify(from: .stickyInsert, with: [action: [value]], notificationName: T.notificationName)
-        case .update(let index):
-            guard let oldValue = stored?[index] else { return }
-            stored?[index] = value
+            NotificationCenter.stickyInsert.post(name: StickyElement.notificationName, object: nil, userInfo: [action: [value]])
+        case .update(let index, let value, var dataSet):
+            let oldValue = dataSet[index]
+            dataSet[index] = value
+            dataSet.saveWithOverwrite()
             stickyLog("\(oldValue) updated to \(value)")
-            stored?.saveWithOverwrite()
-            notify(from: .stickyUpdate, with: [action: [oldValue,value]], notificationName: T.notificationName)
-        case .create:
-            [value].saveWithOverwrite()
-            notify(from: .stickyCreate, with: [action: [value]], notificationName: T.notificationName)
+            NotificationCenter.stickyUpdate.post(name: StickyElement.notificationName, object: nil, userInfo: [action: [oldValue,value]])
+        case .create(let value):
+            let dataSet = Array(arrayLiteral: value)
+            dataSet.saveWithOverwrite()
             stickyLog("Created new file for \(value))")
+            NotificationCenter.stickyCreate.post(name: StickyElement.notificationName, object: nil, userInfo: [action: [value]])
         default:
-            stickyLog("\(T.name): No action taken")
+            stickyLog("\(StickyElement.entityName): No action taken")
         }
-        StickyCache.shared.stored = stored
-    }
-    
-    private static func notify(from notificationCenter: NotificationCenter, with change: [Action: Any]?, notificationName: NSNotification.Name? = nil) {
-        if let notificationName = notificationName {
-            notificationCenter.post(name: notificationName, object: nil, userInfo: change)
-        }
+        
     }
 }

@@ -1,21 +1,10 @@
 import Foundation
 
-fileprivate let queueNameWrite = "com.sticky.write"
-fileprivate let queueNameWriteAll = "com.sticky.writeAll"
-
-public protocol Stickable: Codable {}
-
-public protocol StickyKey {
-    associatedtype Key: Equatable
-    var key: Key { get }
-}
-
-public typealias Stickyable = Stickable & Equatable & StickyKey
-
 public extension Stickable {
     
     public static func read() -> [Self]? {
-        if let data = StickyCache.shared.stored, data is [Self] {
+        if let data = cache.stored[entityName], !data.isEmpty {
+            stickyLog("Read from cache")
             return data as? [Self]
         } else {
             return Self.decode(from: fileData)
@@ -34,58 +23,49 @@ public extension Stickable {
                 let queue = DispatchQueue(label: "com.sticky.log", qos: .background)
                 queue.async {
                     guard let data = fileData else { return }
-                    stickyLog("\(name): \(String(bytes: data, encoding: .utf8) ?? "")")
+                    stickyLog("\(entityName): \(String(bytes: data, encoding: .utf8) ?? "")")
                 }
             } else {
                 stickyLog(debugDescription)
             }
         } else {
-            print("\(name).\(#function) - Please enable logging in StickyConfiguration to see stored data")
+            print("\(entityName).\(#function) - Please enable logging in StickyConfiguration to see stored data")
         }
     }
     
-    public static var name: String {
+    public static var entityName: String {
         return String(describing: Self.self)
     }
     
-    public static func registerForNotification() {
-        if notificationName == nil {
-            Sticky.shared.registeredNotifications.append(Self.self)
-        }
-    }
-    
-    public static func deregisterForNotification() {
-        if let index = Sticky.shared.registeredNotifications.index(where: { $0 == Self.self} ) {
-            Sticky.shared.registeredNotifications.remove(at: index)
-        }
-    }
-    
-    public static var isRegisteredForNotifications: Bool {
-        return notificationName != nil
-    }
-    
-    public static var notificationName: NSNotification.Name? {
-        if Sticky.shared.registeredNotifications.contains(where: { $0 == Self.self }) {
-            return NSNotification.Name(name)
-        }
-        return nil
+    public static var notificationName: NSNotification.Name {
+            return NSNotification.Name(entityName)
     }
     
     private static var debugDescription: String {
         guard let data = fileData else { return "" }
-        return "\(name): \(String(bytes: data, encoding: .utf8) ?? "")"
+        return "\(entityName): \(String(bytes: data, encoding: .utf8) ?? "")"
     }
     
     private static func decode(from data: Data?) -> [Self]? {
         var decoded: [Self]? = nil
         guard let jsonData = data, !jsonData.isEmpty else { return nil }
+        
         do {
-            decoded = try JSONDecoder().decode([Self].self, from: jsonData)
+            let decoder = JSONDecoder()
+            decoder.userInfo = [CodingUserInfoKey.codedTypeKey: entityName]
+            decoded = try decoder.decode([Self].self, from: jsonData)
         } catch {
-            print("ERROR: \(name).\(#function) \(error.localizedDescription) Make sure any new data properties are marked as optional.")
-            fatalError()
+            var errorMessage = "ERROR: \(entityName).\(#function) \(error.localizedDescription) "
+            errorMessage += handleDecodeError(error) ?? ""
+            errorMessage += debugDescription
+            stickyLog(errorMessage)
         }
-        StickyCache.shared.stored = decoded
+        
+        // Write to cache if data is returned and cache is empty
+        if let decoded = decoded, cache.stored.isEmpty {
+            cache.stored.updateValue(decoded, forKey: entityName)
+        }
+        
         return decoded
     }
     
@@ -96,9 +76,19 @@ public extension Stickable {
     public static var filePath: String {
         return FileHandler.fullPath(for: Self.self)
     }
+    
+    private static func handleDecodeError(_ error: Error) -> String? {
+        guard let decodeError = error as? DecodingError else { return nil }
+        switch decodeError {
+        case .keyNotFound(_, let context): return context.debugDescription
+        case .dataCorrupted(let context): return context.debugDescription
+        case .typeMismatch(_, let context): return context.debugDescription
+        case .valueNotFound(_, let context): return context.debugDescription
+        }
+    }
 }
 
-public extension Stickable where Self: Equatable {
+public extension Stickable where Self: Equatable & StickyPromise {
     // Public API
     ///
     /// Checks to see if data object is stored locally.
@@ -121,7 +111,7 @@ public extension Stickable where Self: Equatable {
     /// and performance are less concerning. More suited for transactional data.
     ///
     public func stick() {
-        stickyLog("\(Self.name) saving without key")
+        stickyLog("\(Self.entityName) saving without key")
         self.save()
     }
     
@@ -132,20 +122,23 @@ public extension Stickable where Self: Equatable {
     // Implementation
     
     fileprivate func delete() {
-        stickyLog("\(Self.name) removing data \(self)")
-        let index = Self.read()?.index(of: self)
-        Store.remove(value: self, from: Self.read(), at: index)
+        let dataSet = Self.read()
+        stickyLog("\(Self.entityName) removing data \(self)")
+        let index = dataSet?.index(of: self)
+        Store.remove(value: self, from: dataSet, at: index)
     }
     
     fileprivate func save() {
-        let index = Self.read()?.index(of: self)
-        Store.save(value: self, to: Self.read(), at: index)
+        let dataSet = Self.read()
+        let index = dataSet?.index(of: self)
+        let stickyAction = Store.stickyAction(from: dataSet, with: self, at: index)
+        Store.save(with: stickyAction)
     }
 }
 
 //MARK: - Stickable - Equatable & StickyKey
 
-public extension Stickable where Self: Equatable & StickyKey {
+public extension Stickable where Self: Equatable & StickyKey & StickyPromise {
     // Public API
     ///
     /// When data object conforms to StickyKey, this method will seek
@@ -157,68 +150,14 @@ public extension Stickable where Self: Equatable & StickyKey {
     /// Use this method if you have data objects with one or two
     /// properties that ensure uniqueness and need to update values frequently.
     ///
-    public func stickWithKey() {
-        stickyLog("\(Self.name) saving with key")
-        let index = Self.read()?
+    @discardableResult public func stickWithKey() -> StickyPromise {
+        let dataSet = Self.read()
+        stickyLog("\(Self.entityName) saving with key")
+        let index = dataSet?
                     .map({ $0.key })
                     .index(of: self.key)
-        Store.save(value: self, to: Self.read(), at: index)
+        let stickyAction = Store.stickyAction(from: dataSet, with: self, at: index)
+        Store.save(with: stickyAction)
+        return self as StickyPromise
     }
-}
-
-public extension Collection where Element: Stickable, Self: Codable {
-    internal func saveWithOverwrite() {
-        let queue = DispatchQueue(label: queueNameWriteAll)
-        queue.async {
-            guard let encodedData = self.encode(self) else { return }
-            let path = FileHandler.fullPath(for: Element.self)
-            FileHandler.write(data: encodedData, to: path)
-        }
-    }
-    
-    private func encode<T>(_ obj: T) -> Data? where T: Encodable {
-        var data: Data? = nil
-        do {
-            data = try JSONEncoder().encode(obj)
-        } catch let error {
-            print("ERROR: \(error.localizedDescription)")
-        }
-        return data
-    }
-}
-
-public extension Collection where Element: Stickable & Equatable, Self: Codable {
-    public func stickAll() {
-        if Sticky.shared.configuration.async {
-            let queue = DispatchQueue(label: queueNameWrite)
-            queue.sync {
-                self.forEach { savable in
-                    savable.stick()
-                }
-            }
-        } else {
-            self.forEach { savable in
-                savable.stick()
-            }
-        }
-    }
-
-}
-
-public extension Collection where Element: Stickyable, Self: Codable {
-    public func stickAllWithKey() {
-        if Sticky.shared.configuration.async {
-            let queue = DispatchQueue(label: queueNameWrite)
-            queue.async {
-                self.forEach { savable in
-                    savable.stickWithKey()
-                }
-            }
-        } else {
-            self.forEach { savable in
-                savable.stickWithKey()
-            }
-        }
-    }
-    
 }

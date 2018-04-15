@@ -1,11 +1,3 @@
-//
-//  AppDelegate.swift
-//  stickyApp
-//
-//  Created by James Langdon on 12/31/17.
-//  Copyright © 2017 James Langdon. All rights reserved.
-//
-
 import UIKit
 import Sticky
 
@@ -19,10 +11,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let stickyConfig = StickyConfiguration(async: true, logging: true)
         Sticky.configure(with: .custom(stickyConfig))
-        
-        College.registerForNotification()
-        Town.registerForNotification()
-        Sample.registerForNotification()
         
         return true
     }
