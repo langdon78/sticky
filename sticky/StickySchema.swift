@@ -17,17 +17,13 @@ protocol StickySchemable {
     static func readSchemaFile(_ file: StickySchemaFile) -> StickySchema?
 }
 
-public class StickySchema: StickySchemable {
+public class StickySchema {
     public var version: Int
     public var schemaFileData: Data
     
     init(version: Int, schemaFileData: Data) {
         self.version = version
         self.schemaFileData = schemaFileData
-    }
-    
-    func updateEntityName(from oldName: String, to newName: String) {
-        FileHandler.renameFile(from: oldName, to: newName)
     }
     
     public static func readSchemaFile(_ file: StickySchemaFile) -> StickySchema? {
@@ -37,14 +33,42 @@ public class StickySchema: StickySchemable {
     
     public func process() {
         let json = try? JSONSerialization.jsonObject(with: schemaFileData, options: [])
-        guard
-            let dict = json as? [String: Any],
-            let version = dict["version"] as? Int,
-            let entityUpdate = dict["entityNameUpdate"] as? [String: String]
-            else { return }
-        
-        for (oldName, newName) in entityUpdate {
-            updateEntityName(from: oldName, to: newName)
+        guard let dict = json as? [String: Any] else {
+            stickyLog("ERROR: Can not parse JSON file")
+            return
         }
+        guard let fileVersion = dict["version"] as? Int else {
+            stickyLog("ERROR: Missing file version number")
+            return
+        }
+        guard fileVersion == self.version else {
+                stickyLog("ERROR: Version number \(self.version) does not match file version (\(fileVersion))")
+            return
+        }
+        
+        // Update entity name
+        if let entityUpdate = dict["entityNameUpdate"] as? [String: String] {
+            for (oldName, newName) in entityUpdate {
+                if !FileHandler.renameFile(from: oldName, to: newName) {
+                    return
+                }
+            }
+            Sticky.shared.incrementSchemaVersion(to: version)
+        }
+    }
+    
+    public static func processUpdates(for schemaFiles: [StickySchemaFile]) {
+        schemaFiles
+        .sorted { $0.version < $1.version }
+            .compactMap { schemaFile in
+                StickySchema.readSchemaFile(schemaFile)
+            }
+            .forEach { stickySchema in
+                stickySchema.process()
+        }
+    }
+    
+    public static func checkUpdateNeeded(for version: Int) -> Bool {
+        return version != Sticky.shared.currentSchemaVersion
     }
 }

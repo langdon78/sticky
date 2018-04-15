@@ -22,15 +22,17 @@ internal class FileHandler {
         return fileManager.fileExists(atPath: path)
     }
     
-    internal static func renameFile(from oldName: String, to newName: String) {
+    internal static func renameFile(from oldName: String, to newName: String) -> Bool {
         let originPath = url(for: oldName)
         let destinationPath = url(for: newName)
         do {
             try FileManager.default.moveItem(at: originPath, to: destinationPath)
             stickyLog("Entity changed from \(oldName) to \(newName)")
+            return true
         }
         catch {
             print(error.localizedDescription)
+            return false
         }
     }
     
