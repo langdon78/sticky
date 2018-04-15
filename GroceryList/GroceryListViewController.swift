@@ -40,7 +40,7 @@ class GroceryListViewController: UIViewController {
     }
     
     private func saveAndUpdateList(with groceryItem: GroceryItem) {
-        groceryItem.save()
+        groceryItem.saveToStore()
         loadGroceryListFromStore()
     }
     
@@ -110,7 +110,7 @@ extension GroceryListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if (editingStyle == UITableViewCellEditingStyle.delete) {
             let removedItem = groceryList.remove(at: indexPath.row)
-            removedItem.delete()
+            removedItem.deleteFromStore()
             tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
         }
     }

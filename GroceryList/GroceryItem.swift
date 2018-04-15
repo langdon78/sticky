@@ -7,8 +7,8 @@ protocol Saveable: StickyKeyable {
     var key: Key { get }
     static var storedData: [Self] { get }
     
-    func save()
-    func delete()
+    func saveToStore()
+    func deleteFromStore()
 }
 
 extension Saveable {
@@ -17,11 +17,11 @@ extension Saveable {
         return self.read() ?? []
     }
     
-    func save() {
+    func saveToStore() {
         self.stickWithKey()
     }
     
-    func delete() {
+    func deleteFromStore() {
         self.unstick()
     }
 }
