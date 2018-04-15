@@ -74,7 +74,7 @@ public extension Stickable {
     }
     
     public static var filePath: String {
-        return FileHandler.fullPath(for: Self.self)
+        return FileHandler.url(for: Self.entityName).path
     }
     
     private static func handleDecodeError(_ error: Error) -> String? {

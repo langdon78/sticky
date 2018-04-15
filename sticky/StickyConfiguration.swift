@@ -22,7 +22,8 @@ public struct StickyConfiguration {
         fileExtensionName: String = defaultFileExtension,
         clearDirectory: Bool = false,
         async: Bool = false,
-        logging: Bool = false
+        logging: Bool = false,
+        schemaVersion: Int = 1
         ) {
         self.localDirectory = localDirectory
         self.preloadCache = preloadCache

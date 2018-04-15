@@ -9,7 +9,18 @@ public func stickyLog(_ content: Any) {
 }
 
 public class Sticky {
+    let userDefaultsSchemaVersionKey = "schemaVersion"
+    
     public static let shared = Sticky()
+    
+    public var currentSchemaVersion: Int {
+        get {
+            return UserDefaults.standard.integer(forKey: userDefaultsSchemaVersionKey)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: userDefaultsSchemaVersionKey)
+        }
+    }
     
     public var configuration: StickyConfiguration {
         return configurationSettings.configuration
@@ -35,6 +46,10 @@ public class Sticky {
     
     private func clearContentsOfDirectory() {
         FileHandler.clear()
+    }
+    
+    internal func incrementSchemaVersion() {
+        currentSchemaVersion += 1
     }
 }
 

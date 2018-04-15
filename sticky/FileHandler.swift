@@ -9,18 +9,29 @@ internal class FileHandler {
         return Sticky.shared.configuration.fileExtensionName
     }
     
-    internal static func fullPath(for persistantObject: Stickable.Type) -> String {
+    internal static func url(for persistantObjectName: String) -> URL {
         var configuredUrl = FileHandler.localDirectory
-        let fileName = String(describing: persistantObject)
+        let fileName = persistantObjectName
         let fileExtension = FileHandler.fileExtensionName
         configuredUrl.appendPathComponent(fileName + fileExtension)
-        let path = configuredUrl.path
-        return path
+        return configuredUrl
     }
     
     internal static func fileExists(at path: String) -> Bool {
         let fileManager = FileManager.default
         return fileManager.fileExists(atPath: path)
+    }
+    
+    internal static func renameFile(from oldName: String, to newName: String) {
+        let originPath = url(for: oldName)
+        let destinationPath = url(for: newName)
+        do {
+            try FileManager.default.moveItem(at: originPath, to: destinationPath)
+            stickyLog("Entity changed from \(oldName) to \(newName)")
+        }
+        catch {
+            print(error.localizedDescription)
+        }
     }
     
     internal static func read(from path: String) -> Data? {

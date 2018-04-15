@@ -14,8 +14,8 @@ public extension Collection where Element: Stickable, Self: Codable {
         let queue = DispatchQueue(label: queueNameWriteAll)
         queue.async {
             guard let encodedData = self.encode(self) else { return }
-            let path = FileHandler.fullPath(for: Element.self)
-            FileHandler.write(data: encodedData, to: path)
+            let url = FileHandler.url(for: Element.entityName)
+            FileHandler.write(data: encodedData, to: url.path)
         }
     }
     
