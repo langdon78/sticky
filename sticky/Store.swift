@@ -76,7 +76,7 @@ internal class Store {
         guard var dataSet = dataSet else { return }
         if let index = index {
             dataSet.remove(at: index)
-            saveAndCache(dataSet)
+            dataSet.saveWithOverwrite()
             stickyLog("\(value) deleted")
             let userInfo: [Action<StickyElement>: Any] = [.delete: [value]]
             NotificationCenter.stickyDelete.post(name: StickyElement.notificationName, object: nil, userInfo: userInfo)
@@ -91,30 +91,23 @@ internal class Store {
         switch action {
         case .insert(let value, var dataSet):
             dataSet.append(value)
-            saveAndCache(dataSet)
+            dataSet.saveWithOverwrite()
             stickyLog("\(value) inserted")
             NotificationCenter.stickyInsert.post(name: StickyElement.notificationName, object: nil, userInfo: [action: [value]])
         case .update(let index, let value, var dataSet):
             let oldValue = dataSet[index]
             dataSet[index] = value
-            saveAndCache(dataSet)
+            dataSet.saveWithOverwrite()
             stickyLog("\(oldValue) updated to \(value)")
             NotificationCenter.stickyUpdate.post(name: StickyElement.notificationName, object: nil, userInfo: [action: [oldValue,value]])
         case .create(let value):
             let dataSet = Array(arrayLiteral: value)
-            saveAndCache(dataSet)
+            dataSet.saveWithOverwrite()
             stickyLog("Created new file for \(value))")
             NotificationCenter.stickyCreate.post(name: StickyElement.notificationName, object: nil, userInfo: [action: [value]])
         default:
             stickyLog("\(StickyElement.name): No action taken")
         }
-        
-    }
-    
-    private static func saveAndCache<StickyElement: StickyComparable>(_ dataSet: StickyDataSet<StickyElement>) {
-        
-        dataSet.saveWithOverwrite()
-        StickyCache.shared.stored = dataSet
         
     }
 }

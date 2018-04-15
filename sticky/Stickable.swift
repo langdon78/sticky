@@ -1,43 +1,11 @@
 import Foundation
 
-fileprivate let queueNameWrite = "com.sticky.write"
-fileprivate let queueNameWriteAll = "com.sticky.writeAll"
-
-public protocol StickyPromise {
-    func after(_ completion: () -> Void)
-}
-
-public extension StickyPromise {
-    func after(_ completion: () -> Void) {
-        completion()
-    }
-}
-
-public protocol Stickable: Codable, StickyPromise {}
-
-public protocol StickyKey {
-    associatedtype Key: Equatable
-    var key: Key { get }
-}
-
-public typealias StickyComparable = Stickable & Equatable
-public typealias StickyKeyable = StickyComparable & StickyKey
-public typealias StickyDataSet<T: StickyComparable> = [T]
-
-public extension CodingUserInfoKey {
-    public static let codedTypeKey = CodingUserInfoKey(rawValue: "codedTypeName")!
-}
-
-public extension Decoder {
-    public var codedTypeName: String {
-        return userInfo[CodingUserInfoKey.codedTypeKey] as? String ?? ""
-    }
-}
-
 public extension Stickable {
     
     public static func read() -> [Self]? {
-        if let data = StickyCache.shared.stored, !data.isEmpty, data is [Self] {
+        let dataKey = String(describing: self)
+        if let data = cache.stored[dataKey], !data.isEmpty {
+            stickyLog("Read from cache")
             return data as? [Self]
         } else {
             return Self.decode(from: fileData)
@@ -93,7 +61,6 @@ public extension Stickable {
             errorMessage += debugDescription
             stickyLog(errorMessage)
         }
-        StickyCache.shared.stored = decoded
         return decoded
     }
     
@@ -156,8 +123,9 @@ public extension Stickable where Self: Equatable & StickyPromise {
     }
     
     fileprivate func save() {
-        let index = Self.read()?.index(of: self)
-        let stickyAction = Store.stickyAction(from: Self.read(), with: self, at: index)
+        let dataSet = Self.read()
+        let index = dataSet?.index(of: self)
+        let stickyAction = Store.stickyAction(from: dataSet, with: self, at: index)
         Store.save(with: stickyAction)
     }
 }
@@ -177,69 +145,13 @@ public extension Stickable where Self: Equatable & StickyKey & StickyPromise {
     /// properties that ensure uniqueness and need to update values frequently.
     ///
     @discardableResult public func stickWithKey() -> StickyPromise {
+        let dataSet = Self.read()
         stickyLog("\(Self.name) saving with key")
-        let index = Self.read()?
+        let index = dataSet?
                     .map({ $0.key })
                     .index(of: self.key)
-        let stickyAction = Store.stickyAction(from: Self.read(), with: self, at: index)
+        let stickyAction = Store.stickyAction(from: dataSet, with: self, at: index)
         Store.save(with: stickyAction)
         return self as StickyPromise
     }
 }
-
-public extension Collection where Element: Stickable, Self: Codable {
-    internal func saveWithOverwrite() {
-        let queue = DispatchQueue(label: queueNameWriteAll)
-        queue.async {
-            guard let encodedData = self.encode(self) else { return }
-            let path = FileHandler.fullPath(for: Element.self)
-            FileHandler.write(data: encodedData, to: path)
-        }
-    }
-    
-    private func encode<T>(_ obj: T) -> Data? where T: Encodable {
-        var data: Data? = nil
-        do {
-            data = try JSONEncoder().encode(obj)
-        } catch let error {
-            print("ERROR: \(error.localizedDescription)")
-        }
-        return data
-    }
-}
-
-public extension Collection where Element: Stickable & Equatable & StickyPromise, Self: Codable {
-    public func stickAll() {
-        if Sticky.shared.configuration.async {
-            let queue = DispatchQueue(label: queueNameWrite)
-            queue.sync {
-                self.forEach { savable in
-                    savable.stick()
-                }
-            }
-        } else {
-            self.forEach { savable in
-                savable.stick()
-            }
-        }
-    }
-
-}
-
-public extension Collection where Element: StickyKeyable & StickyPromise, Self: Codable {
-    public func stickAllWithKey() {
-        if Sticky.shared.configuration.async {
-            let queue = DispatchQueue(label: queueNameWrite)
-            queue.async {
-                self.forEach { savable in
-                    savable.stickWithKey()
-                }
-            }
-        } else {
-            self.forEach { savable in
-                savable.stickWithKey()
-            }
-        }
-    }
-}
-
