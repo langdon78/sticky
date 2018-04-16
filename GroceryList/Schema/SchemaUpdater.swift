@@ -6,7 +6,8 @@ class StoredDataSchemaUpdater {
     // Set [{version}: {fileName}]
     fileprivate static let fileVersionMap: [Int: String] = [
         1: "sticky_schema_1",
-        2: "sticky_schema_2"
+        2: "sticky_schema_2",
+        3: "sticky_schema_3"
     ]
     
     fileprivate static var schemaFiles: [StickySchemaFile] {
