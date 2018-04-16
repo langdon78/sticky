@@ -23,6 +23,7 @@
 		BC265F4B1FF9523A0068422A /* FileHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F4A1FF9523A0068422A /* FileHandler.swift */; };
 		BC265F4D1FF953320068422A /* Sticky.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F4C1FF953320068422A /* Sticky.swift */; };
 		BC265F4F1FF953CF0068422A /* StickyConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */; };
+		BC5553612084D5C700174E0E /* sticky_schema_3.json in Resources */ = {isa = PBXBuildFile; fileRef = BC5553602084D5C700174E0E /* sticky_schema_3.json */; };
 		BCA74ED7208138460087F9BF /* GroceryListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA74ED6208138460087F9BF /* GroceryListTableViewCell.swift */; };
 		BCA74ED92081390B0087F9BF /* GroceryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCA74ED82081390B0087F9BF /* GroceryItem.swift */; };
 		BCB48C422082D6C100A57B96 /* StickyCollections.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB48C412082D6C100A57B96 /* StickyCollections.swift */; };
@@ -100,6 +101,7 @@
 		BC265F4A1FF9523A0068422A /* FileHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileHandler.swift; sourceTree = "<group>"; };
 		BC265F4C1FF953320068422A /* Sticky.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sticky.swift; sourceTree = "<group>"; };
 		BC265F4E1FF953CF0068422A /* StickyConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyConfiguration.swift; sourceTree = "<group>"; };
+		BC5553602084D5C700174E0E /* sticky_schema_3.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = sticky_schema_3.json; sourceTree = "<group>"; };
 		BCA74ED6208138460087F9BF /* GroceryListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryListTableViewCell.swift; sourceTree = "<group>"; };
 		BCA74ED82081390B0087F9BF /* GroceryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryItem.swift; sourceTree = "<group>"; };
 		BCB48C412082D6C100A57B96 /* StickyCollections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StickyCollections.swift; path = sticky/StickyCollections.swift; sourceTree = SOURCE_ROOT; };
@@ -232,6 +234,7 @@
 			children = (
 				BCB48C482083AE9C00A57B96 /* sticky_schema_1.json */,
 				BC11018E2083FECD0034A6AE /* sticky_schema_2.json */,
+				BC5553602084D5C700174E0E /* sticky_schema_3.json */,
 				BC11018C2083E9670034A6AE /* SchemaUpdater.swift */,
 			);
 			path = Schema;
@@ -386,6 +389,7 @@
 				BC265EC31FF93B850068422A /* Assets.xcassets in Resources */,
 				BC11018F2083FECD0034A6AE /* sticky_schema_2.json in Resources */,
 				BC265EC11FF93B850068422A /* Main.storyboard in Resources */,
+				BC5553612084D5C700174E0E /* sticky_schema_3.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

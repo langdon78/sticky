@@ -48,12 +48,14 @@ internal class FileHandler {
         }
     }
     
-    internal static func write(data: Data, to path: String) {
+    @discardableResult internal static func write(data: Data, to path: String) -> Bool {
         do {
             try data.write(to: URL(fileURLWithPath: path))
             stickyLog("File updated")
+            return true
         } catch let error {
             print(error.localizedDescription)
+            return false
         }
     }
     
