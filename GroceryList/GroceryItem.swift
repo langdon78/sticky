@@ -33,11 +33,9 @@ struct FoodItem: Saveable {
     }
     var itemName: String
     var quantity: Int
-    var store: String
     
-    init(itemName: String, quantity: Int = 1, store: String = "") {
+    init(itemName: String, quantity: Int = 1) {
         self.itemName = itemName
         self.quantity = quantity
-        self.store = store
     }
 }
