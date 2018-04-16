@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "propertyUpdate": {
+    "renameProperty": {
         "FoodItem": {
             "amount": "quantity"
         }
