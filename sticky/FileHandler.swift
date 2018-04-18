@@ -31,7 +31,7 @@ internal class FileHandler {
             return true
         }
         catch {
-            print(error.localizedDescription)
+            stickyLog(error.localizedDescription, logAction: .error)
             return false
         }
     }
@@ -43,7 +43,7 @@ internal class FileHandler {
             stickyLog("Read from file")
             return try Data(contentsOf: url)
         } catch {
-            stickyLog("ERROR: \(error.localizedDescription)")
+            stickyLog("ERROR: \(error.localizedDescription)", logAction: .error)
             return nil
         }
     }
@@ -70,7 +70,7 @@ internal class FileHandler {
                 }
             }
         } catch {
-            print(error.localizedDescription)
+            stickyLog(error.localizedDescription, logAction: .error)
         }
     }
 }

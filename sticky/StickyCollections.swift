@@ -24,7 +24,7 @@ public extension Collection where Element: Stickable, Self: Codable {
         do {
             data = try JSONEncoder().encode(obj)
         } catch let error {
-            print("ERROR: \(error.localizedDescription)")
+            stickyLog("ERROR: \(error.localizedDescription)", logAction: .error)
         }
         return data
     }

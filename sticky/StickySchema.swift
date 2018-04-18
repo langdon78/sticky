@@ -36,15 +36,15 @@ public class StickySchema {
     public func process() {
         let json = try? JSONSerialization.jsonObject(with: schemaFileData, options: [])
         guard let dict = json as? [String: Any] else {
-            stickyLog("ERROR: Can not parse JSON file")
+            stickyLog("ERROR: Can not parse JSON file", logAction: .error)
             return
         }
         guard let fileVersion = dict["version"] as? Int else {
-            stickyLog("ERROR: Missing file version number")
+            stickyLog("ERROR: Missing file version number", logAction: .error)
             return
         }
         guard fileVersion == self.version else {
-                stickyLog("ERROR: Version number \(self.version) does not match file version (\(fileVersion))")
+                stickyLog("ERROR: Version number \(self.version) does not match file version (\(fileVersion))", logAction: .error)
             return
         }
         
@@ -63,7 +63,7 @@ public class StickySchema {
                 if let properties = entity.value as? [String: String] {
                     for (oldName, newName) in properties {
                         if !renameProperty(for: entity.key, from: oldName, to: newName) { return }
-                        print("Changed \(entity.key) property name from \"\(oldName)\" to \"\(newName)\"")
+                        stickyLog("Changed \(entity.key) property name from \"\(oldName)\" to \"\(newName)\"")
                     }
                 }
             }
@@ -75,7 +75,7 @@ public class StickySchema {
                 if let properties = entity.value as? [String: String] {
                     for (name, defaultValue) in properties {
                         if !addProperty(name, for: entity.key, with: defaultValue) { return }
-                        print("Added property \"\(name)\" to \(entity.key) with default value of \"\(defaultValue)\"")
+                        stickyLog("Added property \"\(name)\" to \(entity.key) with default value of \"\(defaultValue)\"")
                     }
                 }
             }
@@ -87,7 +87,7 @@ public class StickySchema {
                 if let properties = entity.value as? [String] {
                     for propertyToRemove in properties {
                         if !removeProperty(propertyToRemove, from: entity.key) { return }
-                        print("Removed property \"\(propertyToRemove)\" from \"\(entity.key)\"")
+                        stickyLog("Removed property \"\(propertyToRemove)\" from \"\(entity.key)\"")
                     }
                 }
             }
@@ -105,7 +105,7 @@ public class StickySchema {
                 item.removeValue(forKey: oldName)
                 item.updateValue(property, forKey: newName)
             } else {
-                stickyLog("ERROR: Couldn't rename \"\(oldName)\" in \"\(entityName)\" because property doesn't exist.")
+                stickyLog("ERROR: Couldn't rename \"\(oldName)\" in \"\(entityName)\" because property doesn't exist.", logAction: .error)
                 return false
             }
             result.append(item)
@@ -121,7 +121,7 @@ public class StickySchema {
         for var item in storedEntities {
             // Do nothing if property already exists
             if let _ = item[newPropertyName] {
-                stickyLog("ERROR: Couldn't add \"\(newPropertyName)\" to \"\(entityName)\" because property already exists")
+                stickyLog("ERROR: Couldn't add \"\(newPropertyName)\" to \"\(entityName)\" because property already exists", logAction: .error)
                 return false
             } else {
                 item.updateValue(defaultValue, forKey: newPropertyName)
@@ -140,7 +140,7 @@ public class StickySchema {
             if let _ = item[removedProperty] {
                 item.removeValue(forKey: removedProperty)
             } else {
-                stickyLog("ERROR: Couldn't remove \"\(removedProperty)\" in \"\(entityName)\" because property doesn't exist.")
+                stickyLog("ERROR: Couldn't remove \"\(removedProperty)\" in \"\(entityName)\" because property doesn't exist.", logAction: .error)
                 return false
             }
             result.append(item)
@@ -151,13 +151,13 @@ public class StickySchema {
     private func readStickyJsonFile(for entityName: String) -> StickyEntityCollection? {
         let filePath = FileHandler.url(for: entityName).path
         guard let data = FileHandler.read(from: filePath) else {
-            stickyLog("ERROR: Could not read JSON file data for \(filePath)")
+            stickyLog("ERROR: Could not read JSON file data for \(filePath)", logAction: .error)
             return nil
         }
         do {
             let json = try JSONSerialization.jsonObject(with: data, options: [])
             guard let result = json as? StickyEntityCollection else {
-                stickyLog("ERROR: Can not parse JSON file \(filePath)")
+                stickyLog("ERROR: Can not parse JSON file \(filePath)", logAction: .error)
                 return nil
             }
             return result
@@ -175,7 +175,7 @@ public class StickySchema {
             return FileHandler.write(data: newData, to: filePath)
         }
         catch {
-            stickyLog(error.localizedDescription)
+            stickyLog(error.localizedDescription, logAction: .error)
             return false
         }
     }

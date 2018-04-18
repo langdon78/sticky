@@ -1,5 +1,7 @@
 import Foundation
 
+fileprivate let codingUserInfoKey = "codedTypeName"
+
 public protocol StickyPromise {
     func after(_ completion: () -> Void)
 }
@@ -22,7 +24,7 @@ public typealias StickyKeyable = StickyComparable & StickyKey
 public typealias StickyDataSet<T: StickyComparable> = [T]
 
 public extension CodingUserInfoKey {
-    public static let codedTypeKey = CodingUserInfoKey(rawValue: "codedTypeName")!
+    public static let codedTypeKey = CodingUserInfoKey(rawValue: codingUserInfoKey)!
 }
 
 public extension Decoder {

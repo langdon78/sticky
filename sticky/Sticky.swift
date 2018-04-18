@@ -1,9 +1,26 @@
 import Foundation
+import os
 
-public func stickyLog(_ content: Any) {
+public enum StickyLogAction {
+    case error
+    case debug
+    case info
+    
+    var osLogType: OSLogType {
+        switch self {
+        case .error: return .error
+        case .debug: return .debug
+        case .info: return .info
+        }
+    }
+}
+
+let log = OSLog(subsystem: "com.sticky.logging", category: "General")
+
+public func stickyLog(_ content: Any, logAction: StickyLogAction = .info) {
     if Sticky.shared.configuration.logging {
         if let message = content as? String {
-            NSLog("sticky_log_output:  \(message)")
+            os_log("sticky_log_output %@", log: log, type: logAction.osLogType, message)
         }
     }
 }
