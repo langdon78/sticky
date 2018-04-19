@@ -15,10 +15,10 @@ public struct StickySchemaFile {
 }
 
 fileprivate enum StickySchemaAction: CustomStringConvertible {
-    case renameEntity([String: Any]?)
-    case renameProperty([String: Any]?)
-    case newProperty([String: Any]?)
-    case removeProperty([String: Any]?)
+    case renameEntity
+    case renameProperty
+    case newProperty
+    case removeProperty
     
     var description: String {
         switch self {
@@ -29,21 +29,12 @@ fileprivate enum StickySchemaAction: CustomStringConvertible {
         }
     }
     
-    func data() -> StickySchemaAction {
-        switch self {
-        case .renameEntity(let input):
-            return .renameEntity(parseSchemaActionData(input))
-        case .renameProperty(let input):
-            return .renameProperty(parseSchemaActionData(input))
-        case .newProperty(let input):
-            return .newProperty(parseSchemaActionData(input))
-        case .removeProperty(let input):
-            return .removeProperty(parseSchemaActionData(input))
+    func parse(_ data: [String: Any]?, with operation: ([String: Any]) -> Bool) -> Bool {
+        guard let data = data?[self.description] as? [String: Any] else {
+            stickyLog("No required action for \(description)")
+            return false
         }
-    }
-    
-    private func parseSchemaActionData(_ data: [String: Any]?) -> [String: Any]? {
-        return data?[self.description] as? [String: Any]
+        return operation(data)
     }
 }
 
@@ -88,62 +79,59 @@ public class StickySchema {
     }
     
     public func process() {
-        let schemaActions: [StickySchemaAction] = [
-            .renameEntity(schemaActionData),
-            .renameProperty(schemaActionData),
-            .newProperty(schemaActionData),
-            .removeProperty(schemaActionData)
-        ]
         
-        schemaActions.forEach {
-            guard let data = $0.data() else { return }
-            
-        }
-        // Update entity name
-//        if let entityUpdate = dict["renameEntity"] as? [String: String] {
-            for (oldName, newName) in renameEntityData {
-                if !FileHandler.renameFile(from: oldName, to: newName) {
-                    return
-                }
-            }
-//        }
-        
-        // Update property name
-        if let propertyUpdate = dict["renameProperty"] as? [String: Any] {
-            for entity in propertyUpdate {
-                if let properties = entity.value as? [String: String] {
-                    for (oldName, newName) in properties {
-                        if !renameProperty(for: entity.key, from: oldName, to: newName) { return }
-                        stickyLog("Changed \(entity.key) property name from \"\(oldName)\" to \"\(newName)\"")
-                    }
-                }
-            }
-        }
-        
-        // Add new property
-        if let newProperty = dict["newProperty"] as? [String: Any] {
-            for entity in newProperty {
-                if let properties = entity.value as? [String: String] {
-                    for (name, defaultValue) in properties {
-                        if !addProperty(name, for: entity.key, with: defaultValue) { return }
-                        stickyLog("Added property \"\(name)\" to \(entity.key) with default value of \"\(defaultValue)\"")
-                    }
-                }
-            }
-        }
-        
-        // Remove property
-        if let removedProperty = dict["removeProperty"] as? [String: Any] {
-            for entity in removedProperty {
-                if let properties = entity.value as? [String] {
-                    for propertyToRemove in properties {
-                        if !removeProperty(propertyToRemove, from: entity.key) { return }
-                        stickyLog("Removed property \"\(propertyToRemove)\" from \"\(entity.key)\"")
-                    }
-                }
-            }
-        }
+        guard StickySchemaAction.renameEntity.parse(schemaActionData, with: processRenameEntity) else { return }
+        guard StickySchemaAction.renameProperty.parse(schemaActionData, with: processRenameProperty) else { return }
+        guard StickySchemaAction.newProperty.parse(schemaActionData, with: processNewProperty) else { return }
+        guard StickySchemaAction.removeProperty.parse(schemaActionData, with: processRemoveProperty) else { return }
         Sticky.shared.incrementSchemaVersion(to: version)
+    }
+    
+    private func processRenameEntity(for data: [String: Any]) -> Bool {
+        if let renameEntityData = data as? [String: String] {
+            let resultMap = renameEntityData.map { (oldName, newName) in
+                FileHandler.renameFile(from: oldName, to: newName)
+            }
+            return !resultMap.contains(false)
+        }
+        return false
+    }
+    
+    private func processRenameProperty(for data: [String: Any]) -> Bool {
+        let resultMap: [Bool] = data.map { entity in
+            if let properties = entity.value as? [String: String] {
+                for (oldName, newName) in properties {
+                    return renameProperty(for: entity.key, from: oldName, to: newName)
+                }
+            }
+            return false
+        }
+        return !resultMap.contains(false)
+    }
+    
+    private func processNewProperty(for data: [String: Any]) -> Bool {
+        let resultMap: [Bool] = data.map { entity in
+            if let properties = entity.value as? [String: String] {
+                for (name, defaultValue) in properties {
+                    return addProperty(name, for: entity.key, with: defaultValue)
+                    
+                }
+            }
+            return false
+        }
+        return !resultMap.contains(false)
+    }
+    
+    private func processRemoveProperty(for data: [String: Any]) -> Bool {
+        let resultMap: [Bool] = data.map { entity in
+            if let properties = entity.value as? [String] {
+                for propertyToRemove in properties {
+                    return removeProperty(propertyToRemove, from: entity.key)
+                }
+            }
+            return false
+        }
+        return !resultMap.contains(false)
     }
     
     public func renameProperty(for entityName: String, from oldName: String, to newName: String) -> Bool {
@@ -151,10 +139,10 @@ public class StickySchema {
         
         var result: StickyEntityCollection = []
         for var item in storedEntities {
-            // Break if property doesn't exist
             if let property = item[oldName] {
                 item.removeValue(forKey: oldName)
                 item.updateValue(property, forKey: newName)
+                stickyLog("Changed \(entityName) property name from \"\(oldName)\" to \"\(newName)\"")
             } else {
                 stickyLog("ERROR: Couldn't rename \"\(oldName)\" in \"\(entityName)\" because property doesn't exist.", logAction: .error)
                 return false
@@ -177,6 +165,7 @@ public class StickySchema {
             } else {
                 item.updateValue(defaultValue, forKey: newPropertyName)
                 result.append(item)
+                stickyLog("Added property \"\(newPropertyName)\" to \(entityName) with default value of \"\(defaultValue)\"")
             }
         }
         
@@ -190,6 +179,7 @@ public class StickySchema {
         for var item in storedEntities {
             if let _ = item[removedProperty] {
                 item.removeValue(forKey: removedProperty)
+                stickyLog("Removed property \"\(removedProperty)\" from \"\(entityName)\"")
             } else {
                 stickyLog("ERROR: Couldn't remove \"\(removedProperty)\" in \"\(entityName)\" because property doesn't exist.", logAction: .error)
                 return false
