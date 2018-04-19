@@ -1,5 +1,7 @@
 import Foundation
 
+typealias JSON = Any
+
 internal typealias StickyEntityCollection = [[String: Any]]
 
 public struct StickySchemaFile {
@@ -12,50 +14,99 @@ public struct StickySchemaFile {
     }
 }
 
-protocol StickySchemable {
-    var version: Int { get set }
+fileprivate enum StickySchemaAction: CustomStringConvertible {
+    case renameEntity([String: Any]?)
+    case renameProperty([String: Any]?)
+    case newProperty([String: Any]?)
+    case removeProperty([String: Any]?)
     
-    func updateEntityName(from oldName: String, to newName: String)
-    static func readSchemaFile(_ file: StickySchemaFile) -> StickySchema?
+    var description: String {
+        switch self {
+        case .renameEntity: return "renameEntity"
+        case .renameProperty: return "renameProperty"
+        case .newProperty: return "newProperty"
+        case .removeProperty: return "removeProperty"
+        }
+    }
+    
+    func data() -> StickySchemaAction {
+        switch self {
+        case .renameEntity(let input):
+            return .renameEntity(parseSchemaActionData(input))
+        case .renameProperty(let input):
+            return .renameProperty(parseSchemaActionData(input))
+        case .newProperty(let input):
+            return .newProperty(parseSchemaActionData(input))
+        case .removeProperty(let input):
+            return .removeProperty(parseSchemaActionData(input))
+        }
+    }
+    
+    private func parseSchemaActionData(_ data: [String: Any]?) -> [String: Any]? {
+        return data?[self.description] as? [String: Any]
+    }
 }
 
 public class StickySchema {
-    public var version: Int
-    public var schemaFileData: Data
+    public var stickySchemaFile: StickySchemaFile
     
-    init(version: Int, schemaFileData: Data) {
-        self.version = version
-        self.schemaFileData = schemaFileData
+    private var schemaFileData: Data? {
+        do {
+            return try Data(contentsOf: stickySchemaFile.fileUrl)
+        }
+        catch {
+            stickyLog("ERROR: Unable to process schema file \(stickySchemaFile.fileUrl)", logAction: .error)
+        }
+        return nil
     }
     
-    public static func readSchemaFile(_ file: StickySchemaFile) -> StickySchema? {
-        guard let data = try? Data(contentsOf: file.fileUrl) else { return nil }
-        return StickySchema(version: file.version, schemaFileData: data)
+    private var json: JSON? {
+        guard let schemaFileData = schemaFileData else { return nil }
+        do {
+            return try JSONSerialization.jsonObject(with: schemaFileData, options: [])
+        }
+        catch {
+            stickyLog("ERROR: Unable to parse schema file \(stickySchemaFile.fileUrl)", logAction: .error)
+        }
+        return nil
+    }
+    
+    private var schemaActionData: [String: Any]? {
+        guard let dict = json as? [String: Any] else {
+            stickyLog("ERROR: Can not parse JSON file", logAction: .error)
+            return nil
+        }
+        return dict
+    }
+    
+    public var version: Int {
+        return stickySchemaFile.version
+    }
+    
+    init(for stickySchemaFile: StickySchemaFile) {
+        self.stickySchemaFile = stickySchemaFile
     }
     
     public func process() {
-        let json = try? JSONSerialization.jsonObject(with: schemaFileData, options: [])
-        guard let dict = json as? [String: Any] else {
-            stickyLog("ERROR: Can not parse JSON file", logAction: .error)
-            return
-        }
-        guard let fileVersion = dict["version"] as? Int else {
-            stickyLog("ERROR: Missing file version number", logAction: .error)
-            return
-        }
-        guard fileVersion == self.version else {
-                stickyLog("ERROR: Version number \(self.version) does not match file version (\(fileVersion))", logAction: .error)
-            return
-        }
+        let schemaActions: [StickySchemaAction] = [
+            .renameEntity(schemaActionData),
+            .renameProperty(schemaActionData),
+            .newProperty(schemaActionData),
+            .removeProperty(schemaActionData)
+        ]
         
+        schemaActions.forEach {
+            guard let data = $0.data() else { return }
+            
+        }
         // Update entity name
-        if let entityUpdate = dict["renameEntity"] as? [String: String] {
-            for (oldName, newName) in entityUpdate {
+//        if let entityUpdate = dict["renameEntity"] as? [String: String] {
+            for (oldName, newName) in renameEntityData {
                 if !FileHandler.renameFile(from: oldName, to: newName) {
                     return
                 }
             }
-        }
+//        }
         
         // Update property name
         if let propertyUpdate = dict["renameProperty"] as? [String: Any] {
@@ -184,7 +235,7 @@ public class StickySchema {
         schemaFiles
         .sorted { $0.version < $1.version }
             .compactMap { schemaFile in
-                StickySchema.readSchemaFile(schemaFile)
+                StickySchema(for: schemaFile)
             }
             .forEach { stickySchema in
                 stickySchema.process()
