@@ -26,6 +26,15 @@ extension Saveable {
     }
 }
 
+struct Store: Saveable {
+    var key: Int {
+        return id
+    }
+    var id: Int
+    var name: String
+    var city: String
+}
+
 struct FoodItem: Saveable {
     
     var key: String {
@@ -33,9 +42,11 @@ struct FoodItem: Saveable {
     }
     var itemName: String
     var quantity: Int
+    var store: Store
     
-    init(itemName: String, quantity: Int = 1) {
+    init(itemName: String, quantity: Int = 1, store: Store = Store(id: 0, name: "Walmart", city: "Portland")) {
         self.itemName = itemName
         self.quantity = quantity
+        self.store = store
     }
 }

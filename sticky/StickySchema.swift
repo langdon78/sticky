@@ -120,7 +120,7 @@ extension StickySchemaUpdater {
 
 extension StickySchemaUpdater {
     private func process() {
-        processResults(for: schemaUpdateData).forEach { result in
+        for result in processResults(for: schemaUpdateData) {
             if case .error(let error) = result {
                 stickyLog("ERROR: Unable to finish schema udpate \(version) due to \(error)", logAction: .error)
                 return
@@ -184,13 +184,12 @@ extension StickySchemaUpdater {
     
     private func processNewProperty(for data: [String: Any]) -> SchemaUpdateResult {
         let resultMap: [SchemaUpdateResult] = data.map { entity in
-            if let properties = entity.value as? [String: String] {
+            if let properties = entity.value as? [String: Any] {
                 for (name, defaultValue) in properties {
                     return addProperty(name, for: entity.key, with: defaultValue)
-                    
                 }
             }
-            return .error("Unable to process file")
+            return .error("Unable to process file for \(data)")
         }
         return resultMap.first(where: {$0 != .success}) ?? .success
     }
