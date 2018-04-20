@@ -61,7 +61,7 @@ public class Sticky {
     public static func configure(with config: StickyConfigurationSettings) {
         Sticky.shared.configurationSettings = config
         if let rollback = config.configuration.rollbackToSchemaVersion {
-            Sticky.shared.incrementSchemaVersion(to: rollback)
+            Sticky.shared.changeSchemaVersion(to: rollback)
         }
     }
     
@@ -69,7 +69,7 @@ public class Sticky {
         FileHandler.clear()
     }
     
-    internal func incrementSchemaVersion(to version: Int) {
+    internal func changeSchemaVersion(to version: Int) {
         currentSchemaVersion = version
     }
 }

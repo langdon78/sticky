@@ -4,6 +4,12 @@ typealias JSON = Any
 
 internal typealias StickyEntityCollection = [[String: Any]]
 
+internal enum SchemaUpdateResult: Equatable {
+    case success
+    case noAction(StickySchemaAction)
+    case error(String)
+}
+
 public struct StickySchemaFile {
     public var version: Int
     public var fileUrl: URL
@@ -14,7 +20,7 @@ public struct StickySchemaFile {
     }
 }
 
-fileprivate enum StickySchemaAction: CustomStringConvertible {
+internal enum StickySchemaAction: CustomStringConvertible, Equatable {
     case renameEntity
     case renameProperty
     case newProperty
@@ -29,17 +35,31 @@ fileprivate enum StickySchemaAction: CustomStringConvertible {
         }
     }
     
-    func parse(_ data: [String: Any]?, with operation: ([String: Any]) -> Bool) -> Bool {
+    func parse(_ data: [String: Any]?, with operation: ([String: Any]) -> SchemaUpdateResult) -> SchemaUpdateResult {
         guard let data = data?[self.description] as? [String: Any] else {
-            stickyLog("No required action for \(description)")
-            return false
+            return .noAction(self)
         }
         return operation(data)
     }
 }
 
-public class StickySchema {
+public class StickySchemaUpdater {
+    
+    // MARK: Public properties
+    
     public var stickySchemaFile: StickySchemaFile
+    public var version: Int {
+        return stickySchemaFile.version
+    }
+    
+    // MARK: Private properties
+    
+    private let actions: [StickySchemaAction] = [
+        .renameEntity,
+        .renameProperty,
+        .newProperty,
+        .removeProperty
+    ]
     
     private var schemaFileData: Data? {
         do {
@@ -62,7 +82,7 @@ public class StickySchema {
         return nil
     }
     
-    private var schemaActionData: [String: Any]? {
+    private var schemaUpdateData: [String: Any]? {
         guard let dict = json as? [String: Any] else {
             stickyLog("ERROR: Can not parse JSON file", logAction: .error)
             return nil
@@ -70,72 +90,130 @@ public class StickySchema {
         return dict
     }
     
-    public var version: Int {
-        return stickySchemaFile.version
-    }
-    
-    init(for stickySchemaFile: StickySchemaFile) {
+    public init(for stickySchemaFile: StickySchemaFile) {
         self.stickySchemaFile = stickySchemaFile
     }
+}
+
+// MARK: Public API
+
+extension StickySchemaUpdater {
     
-    public func process() {
-        
-        guard StickySchemaAction.renameEntity.parse(schemaActionData, with: processRenameEntity) else { return }
-        guard StickySchemaAction.renameProperty.parse(schemaActionData, with: processRenameProperty) else { return }
-        guard StickySchemaAction.newProperty.parse(schemaActionData, with: processNewProperty) else { return }
-        guard StickySchemaAction.removeProperty.parse(schemaActionData, with: processRemoveProperty) else { return }
-        Sticky.shared.incrementSchemaVersion(to: version)
-    }
-    
-    private func processRenameEntity(for data: [String: Any]) -> Bool {
-        if let renameEntityData = data as? [String: String] {
-            let resultMap = renameEntityData.map { (oldName, newName) in
-                FileHandler.renameFile(from: oldName, to: newName)
+    public static func processUpdates(for schemaFiles: [StickySchemaFile]) {
+        // Sort each file by version number then process updates
+        schemaFiles
+            .sorted { $0.version < $1.version }
+            .compactMap { schemaFile in
+                StickySchemaUpdater(for: schemaFile)
             }
-            return !resultMap.contains(false)
+            .forEach { stickySchema in
+                stickySchema.process()
         }
-        return false
     }
     
-    private func processRenameProperty(for data: [String: Any]) -> Bool {
-        let resultMap: [Bool] = data.map { entity in
+    public static func checkUpdateNeeded(for version: Int) -> Bool {
+        return version != Sticky.shared.currentSchemaVersion
+    }
+}
+
+// MARK: Process flow control methods
+
+extension StickySchemaUpdater {
+    private func process() {
+        processResults(for: schemaUpdateData).forEach { result in
+            if case .error(let error) = result {
+                stickyLog("ERROR: Unable to finish schema udpate \(version) due to \(error)", logAction: .error)
+                return
+            }
+        }
+        increment(to: version)
+    }
+    
+    private func processResults(for schemaUpdateData: [String: Any]?) -> [SchemaUpdateResult] {
+        return actions.map { action in
+            action.parse(schemaUpdateData, with: processUpdateMethod(for: action))
+        }
+    }
+    
+    private func processUpdateMethod(for action: StickySchemaAction) -> ([String: Any]) -> SchemaUpdateResult {
+        switch action {
+        case .renameEntity: return processRenameEntity
+        case .newProperty: return processNewProperty
+        case .renameProperty: return processRenameProperty
+        case .removeProperty: return processRemoveProperty
+        }
+    }
+    
+    private func increment(to version: Int) {
+        Sticky.shared.changeSchemaVersion(to: version)
+    }
+}
+
+// MARK: Process action methods
+
+extension StickySchemaUpdater {
+    private func processRenameEntity(for data: [String: Any]) -> SchemaUpdateResult {
+        if let renameEntityData = data as? [String: String] {
+            // Rename each sticky file listed in schema file
+            for (oldName, newName) in renameEntityData {
+                let fileResult = FileHandler.renameFile(from: oldName, to: newName)
+                switch fileResult {
+                case .success:
+                    stickyLog("Entity changed from \(oldName) to \(newName)")
+                case .error(let error):
+                    return .error(error.localizedDescription)
+                }
+            }
+        } else {
+            return .error("\"renameEntity\" data contains invalid type")
+        }
+        return .success
+    }
+    
+    private func processRenameProperty(for data: [String: Any]) -> SchemaUpdateResult {
+        let resultMap: [SchemaUpdateResult] = data.map { entity in
             if let properties = entity.value as? [String: String] {
                 for (oldName, newName) in properties {
                     return renameProperty(for: entity.key, from: oldName, to: newName)
                 }
             }
-            return false
+            return .error("Unable to process file")
         }
-        return !resultMap.contains(false)
+        return resultMap.first(where: {$0 != .success}) ?? .success
     }
     
-    private func processNewProperty(for data: [String: Any]) -> Bool {
-        let resultMap: [Bool] = data.map { entity in
+    private func processNewProperty(for data: [String: Any]) -> SchemaUpdateResult {
+        let resultMap: [SchemaUpdateResult] = data.map { entity in
             if let properties = entity.value as? [String: String] {
                 for (name, defaultValue) in properties {
                     return addProperty(name, for: entity.key, with: defaultValue)
                     
                 }
             }
-            return false
+            return .error("Unable to process file")
         }
-        return !resultMap.contains(false)
+        return resultMap.first(where: {$0 != .success}) ?? .success
     }
     
-    private func processRemoveProperty(for data: [String: Any]) -> Bool {
-        let resultMap: [Bool] = data.map { entity in
+    private func processRemoveProperty(for data: [String: Any]) -> SchemaUpdateResult {
+        let resultMap: [SchemaUpdateResult] = data.map { entity in
             if let properties = entity.value as? [String] {
                 for propertyToRemove in properties {
                     return removeProperty(propertyToRemove, from: entity.key)
                 }
             }
-            return false
+            return .error("Unable to process file")
         }
-        return !resultMap.contains(false)
+        return resultMap.first(where: {$0 != .success}) ?? .success
     }
+}
+
+// MARK: Process action helper methods
+
+extension StickySchemaUpdater {
     
-    public func renameProperty(for entityName: String, from oldName: String, to newName: String) -> Bool {
-        guard let storedEntities = readStickyJsonFile(for: entityName) else { return false }
+    private func renameProperty(for entityName: String, from oldName: String, to newName: String) -> SchemaUpdateResult {
+        guard let storedEntities = readStickyJsonFile(for: entityName) else { return .error("Unable to parse") }
         
         var result: StickyEntityCollection = []
         for var item in storedEntities {
@@ -144,8 +222,7 @@ public class StickySchema {
                 item.updateValue(property, forKey: newName)
                 stickyLog("Changed \(entityName) property name from \"\(oldName)\" to \"\(newName)\"")
             } else {
-                stickyLog("ERROR: Couldn't rename \"\(oldName)\" in \"\(entityName)\" because property doesn't exist.", logAction: .error)
-                return false
+                return .error("ERROR: Couldn't rename \"\(oldName)\" in \"\(entityName)\" because property doesn't exist.")
             }
             result.append(item)
         }
@@ -153,15 +230,14 @@ public class StickySchema {
         return writeJsonFile(for: result, to: entityName)
     }
     
-    public func addProperty(_ newPropertyName: String, for entityName: String, with defaultValue: Any) -> Bool {
-        guard let storedEntities = readStickyJsonFile(for: entityName) else { return false }
+    private func addProperty(_ newPropertyName: String, for entityName: String, with defaultValue: Any) -> SchemaUpdateResult {
+        guard let storedEntities = readStickyJsonFile(for: entityName) else { return .error("Unable to parse") }
         
         var result: StickyEntityCollection = []
         for var item in storedEntities {
             // Do nothing if property already exists
             if let _ = item[newPropertyName] {
-                stickyLog("ERROR: Couldn't add \"\(newPropertyName)\" to \"\(entityName)\" because property already exists", logAction: .error)
-                return false
+                return .error("ERROR: Couldn't add \"\(newPropertyName)\" to \"\(entityName)\" because property already exists")
             } else {
                 item.updateValue(defaultValue, forKey: newPropertyName)
                 result.append(item)
@@ -172,8 +248,8 @@ public class StickySchema {
         return writeJsonFile(for: result, to: entityName)
     }
     
-    private func removeProperty(_ removedProperty: String, from entityName: String) -> Bool {
-        guard let storedEntities = readStickyJsonFile(for: entityName) else { return false }
+    private func removeProperty(_ removedProperty: String, from entityName: String) -> SchemaUpdateResult {
+        guard let storedEntities = readStickyJsonFile(for: entityName) else { return .error("Unable to parse") }
         
         var result: StickyEntityCollection = []
         for var item in storedEntities {
@@ -181,13 +257,17 @@ public class StickySchema {
                 item.removeValue(forKey: removedProperty)
                 stickyLog("Removed property \"\(removedProperty)\" from \"\(entityName)\"")
             } else {
-                stickyLog("ERROR: Couldn't remove \"\(removedProperty)\" in \"\(entityName)\" because property doesn't exist.", logAction: .error)
-                return false
+                return .error("Couldn't remove \"\(removedProperty)\" in \"\(entityName)\" because property doesn't exist.")
             }
             result.append(item)
         }
         return writeJsonFile(for: result, to: entityName)
     }
+}
+
+// MARK: File access methods
+
+extension StickySchemaUpdater {
     
     private func readStickyJsonFile(for entityName: String) -> StickyEntityCollection? {
         let filePath = FileHandler.url(for: entityName).path
@@ -209,30 +289,20 @@ public class StickySchema {
         return nil
     }
     
-    private func writeJsonFile(for entityCollection: StickyEntityCollection, to entityName: String) -> Bool {
+    private func writeJsonFile(for entityCollection: StickyEntityCollection, to entityName: String) -> SchemaUpdateResult {
         let filePath = FileHandler.url(for: entityName).path
         do {
             let newData = try JSONSerialization.data(withJSONObject: entityCollection, options: [])
-            return FileHandler.write(data: newData, to: filePath)
+            let fileResult = FileHandler.write(data: newData, to: filePath)
+            switch fileResult {
+            case .success: return .success
+            case .error(let error): return .error(error.localizedDescription)
+            }
         }
         catch {
-            stickyLog(error.localizedDescription, logAction: .error)
-            return false
+            return .error(error.localizedDescription)
         }
     }
     
-    public static func processUpdates(for schemaFiles: [StickySchemaFile]) {
-        schemaFiles
-        .sorted { $0.version < $1.version }
-            .compactMap { schemaFile in
-                StickySchema(for: schemaFile)
-            }
-            .forEach { stickySchema in
-                stickySchema.process()
-        }
-    }
-    
-    public static func checkUpdateNeeded(for version: Int) -> Bool {
-        return version != Sticky.shared.currentSchemaVersion
-    }
+
 }

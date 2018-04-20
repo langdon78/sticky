@@ -30,8 +30,8 @@ class StoredDataSchemaUpdater {
     }
     
     static func processUpdates() {
-        if StickySchema.checkUpdateNeeded(for: maxVersion) {
-            StickySchema.processUpdates(for: schemaFiles)
+        if StickySchemaUpdater.checkUpdateNeeded(for: maxVersion) {
+            StickySchemaUpdater.processUpdates(for: schemaFiles)
         }
     }
 }

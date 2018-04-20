@@ -1,5 +1,10 @@
 import Foundation
 
+internal enum FileResult {
+    case success
+    case error(Error)
+}
+
 internal class FileHandler {
     private static var localDirectory: URL {
         return Sticky.shared.configuration.localDirectory
@@ -22,17 +27,15 @@ internal class FileHandler {
         return fileManager.fileExists(atPath: path)
     }
     
-    internal static func renameFile(from oldName: String, to newName: String) -> Bool {
+    internal static func renameFile(from oldName: String, to newName: String) -> FileResult {
         let originPath = url(for: oldName)
         let destinationPath = url(for: newName)
         do {
             try FileManager.default.moveItem(at: originPath, to: destinationPath)
-            stickyLog("Entity changed from \(oldName) to \(newName)")
-            return true
+            return .success
         }
         catch {
-            stickyLog(error.localizedDescription, logAction: .error)
-            return false
+            return .error(error)
         }
     }
     
@@ -48,14 +51,13 @@ internal class FileHandler {
         }
     }
     
-    @discardableResult internal static func write(data: Data, to path: String) -> Bool {
+    @discardableResult internal static func write(data: Data, to path: String) -> FileResult {
         do {
             try data.write(to: URL(fileURLWithPath: path))
             stickyLog("File updated")
-            return true
+            return .success
         } catch let error {
-            print(error.localizedDescription)
-            return false
+            return .error(error)
         }
     }
     
