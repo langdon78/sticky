@@ -1,5 +1,4 @@
 {
-    "version": 1,
     "renameEntity": {
         "GroceryItem": "FoodItem"
     }

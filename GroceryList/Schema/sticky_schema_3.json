@@ -1,12 +1,11 @@
 {
-    "version": 3,
     "renameProperty": {
         "FoodItem": {
             "store": {
                 "city": "town"
             }
         }
-    }
+    },
     "removeProperty": {
         "FoodItem": {
             "store": [
