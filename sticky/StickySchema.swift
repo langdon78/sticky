@@ -3,9 +3,10 @@ import Foundation
 typealias JSON = Any
 
 internal typealias StickyEntityCollection = [[String: Any]]
+internal typealias StickyDataElement = [String: Any]
 
 internal enum SchemaUpdateResult: Equatable {
-    case success
+    case success(StickyDataElement)
     case noAction(StickySchemaAction)
     case error(String)
 }
@@ -146,6 +147,49 @@ extension StickySchemaUpdater {
     
     private func increment(to version: Int) {
         Sticky.shared.changeSchemaVersion(to: version)
+    }
+    
+    func applyAction(_ schema: [String: Any], with stored: [String: Any], apply action: StickySchemaAction) -> SchemaUpdateResult {
+        var result = stored
+        // Loop through properties for update action on entity
+        for schemaProperty in schema {
+            if let storedProperty = stored[schemaProperty.key] as? [String: Any] {
+                if let nestedSchemaProperty = schemaProperty.value as? [String: Any] {
+                    _ = applyAction(nestedSchemaProperty, with: storedProperty, apply: action)
+                } else {
+                    // No nested property in schema
+                    switch action {
+                    case .renameProperty:
+                        if let newName = schemaProperty.value as? String {
+                            result.removeValue(forKey: schemaProperty.key)
+                            result.updateValue(newName, forKey: schemaProperty.key)
+                            return .success(result)
+                        } else {
+                            return .error("Could not rename property")
+                        }
+                    case .removeProperty:
+                        if let removeList = schemaProperty.value as? [String] {
+                            for itemToRemove in removeList {
+                                if result.removeValue(forKey: itemToRemove) == nil {
+                                    return .error("Property to remove does not exist")
+                                }
+                            }
+                            return .success(result)
+                        }
+                    default:
+                        return .error("Could not apply update")
+                    }
+                }
+            } else {
+                // Property doesn't exist in stored
+                if action == .newProperty {
+                    result.updateValue(schemaProperty.value, forKey: schemaProperty.key)
+                    return .success(result)
+                } else {
+                    return .error("No new property available")
+                }
+            }
+        }
     }
 }
 
