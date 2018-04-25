@@ -3,7 +3,7 @@ import Foundation
 typealias JSON = Any
 
 internal typealias StickyEntityCollection = [[String: Any]]
-internal typealias StickyDataNode = [String: Any]
+internal typealias StickyDataNode<Key: Hashable> = [Key: Any]
 internal typealias StickyEntity = String
 
 internal enum SchemaUpdateResult<StickyDataElement> {
@@ -21,17 +21,32 @@ public struct StickySchemaFile {
     }
 }
 
-internal struct StickySchemaData {
-    var action: StickySchemaAction
+internal struct StickySchemaData<Key: Hashable> {
+    var action: StickySchemaAction<Key>
     var entity: StickyEntity
-    var element: StickyDataNode
+//    var element: StickyDataNode
+    var node: Node<Key>
 }
 
-internal enum StickySchemaAction: String {
+struct Node<Key: Hashable> {
+    var path: [Key]
+    var key: Key
+    var value: Any
+}
+
+internal enum StickySchemaAction<Key: Hashable>: String {
     case renameEntity
     case renameProperty
     case newProperty
     case removeProperty
+    
+    init?(_ value: Key) {
+        guard
+            let stringValue = value as? String,
+            let action = StickySchemaAction(rawValue: stringValue)
+            else { return nil }
+        self =  action
+    }
 }
 
 public class StickySchemaUpdater {
@@ -45,7 +60,7 @@ public class StickySchemaUpdater {
     
     // MARK: Private properties
     
-    private let actions: [StickySchemaAction] = [
+    private let actions: [StickySchemaAction<String>] = [
         .renameEntity,
         .renameProperty,
         .newProperty,
@@ -95,29 +110,65 @@ extension StickySchemaUpdater {
         stickyLog("Looking for actions to process...")
         guard let schemaData = processUpdaterResult(stickySchemaData(for: dictionaryData)) else { return }
         
+        var dataStore: [StickyEntity: StickyEntityCollection] = [:]
+        print("here: \(schemaData)")
         stickyLog("----Processing actions...")
         for schemaUpdateAction in schemaData {
-            stickyLog("----Processing \(schemaUpdateAction.action.rawValue) for \(schemaUpdateAction.entity)----")
+            var collection: StickyEntityCollection = []
             if schemaUpdateAction.action == .renameEntity {
-                guard let _ = processUpdaterResult(processRenameEntity(for: schemaUpdateAction.element)) else { return }
-                continue
+                print(schemaUpdateAction.node.key, schemaUpdateAction.node.value)
+                guard let _ = processUpdaterResult(processRenameEntity(for: [schemaUpdateAction.node.key: schemaUpdateAction.node.value])) else { return }
             }
-            var result: StickyEntityCollection = []
-            guard let stored = readStickyJsonFile(for: schemaUpdateAction.entity) else { return }
-            for  element in stored {
-                guard let processedElement = processUpdaterResult(applyAction(schemaUpdateAction.element, with: element, apply: schemaUpdateAction.action)) else { return }
-                result.append(processedElement)
+            // TODO - Function
+            var stored: StickyEntityCollection = []
+            if let memory = dataStore[schemaUpdateAction.entity] {
+                stored = memory
+            } else if let disk = readStickyJsonFile(for: schemaUpdateAction.entity) {
+                stored = disk
+            } else {
+                stickyLog("Data file for \"\(schemaUpdateAction.entity)\" does not exist")
             }
-            let writeResult = writeJsonFile(for: result, to: schemaUpdateAction.entity)
+
+            for dataItem in stored {
+                stickyLog("Performing action \(schemaUpdateAction.action) on entity \(schemaUpdateAction.entity)")
+                let action = schemaUpdateAction.action
+                switch action {
+                case .removeProperty:
+                    if let properties = schemaUpdateAction.node.value as? [String] {
+                        var pathWithKey = schemaUpdateAction.node.path
+                        pathWithKey.append(schemaUpdateAction.node.key)
+                        let updatedItem = performOperation(on: dataItem, at: pathWithKey, with: removeKeys(properties))
+                        collection.append(updatedItem)
+                    }
+                case .newProperty:
+                    let updatedItem = performOperation(on: dataItem, at: schemaUpdateAction.node.path, with: newNode(schemaUpdateAction.node.value, for: schemaUpdateAction.node.key))
+                    collection.append(updatedItem)
+                case .renameProperty:
+                    if let newKey = schemaUpdateAction.node.value as? String {
+                        let updatedItem = performOperation(on: dataItem, at: schemaUpdateAction.node.path, with: renameKey(from: schemaUpdateAction.node.key, to: newKey))
+                        collection.append(updatedItem)
+                    }
+                default:
+                    stickyLog("No action taken")
+                }
+
+            }
+            dataStore.updateValue(collection, forKey: schemaUpdateAction.entity)
+            collection = []
+        }
+        
+        for (entity, collection) in dataStore {
+            let writeResult = writeJsonFile(for: collection, to: entity)
             if case .error(_) = writeResult {
                 return
             }
         }
-        
+
+        print(dataStore)
         increment(to: version)
     }
     
-    func processUpdaterResult<T>(_ result: SchemaUpdateResult<T>) -> T? {
+    func processUpdaterResult<Key>(_ result: SchemaUpdateResult<Key>) -> Key? {
         switch result {
         case .success(let data):
             stickyLog("Success")
@@ -128,18 +179,21 @@ extension StickySchemaUpdater {
         }
     }
     
-    private func stickySchemaData(for stickyDataNode: StickyDataNode) -> SchemaUpdateResult<[StickySchemaData]> {
-        var stickySchemaData: [StickySchemaData] = []
+    private func stickySchemaData<Key: Hashable>(for stickyDataNode: StickyDataNode<Key>) -> SchemaUpdateResult<[StickySchemaData<Key>]> {
+        print(stickyDataNode)
+        var stickySchemaData: [StickySchemaData<Key>] = []
         for (actionName, entityData) in stickyDataNode {
-            if let action = StickySchemaAction(rawValue: actionName) {
-                if let entity = entityData as? StickyDataNode {
+            if let action = StickySchemaAction(actionName) {
+                print(action)
+                if let entity = entityData as? StickyDataNode<Key> {
                     for (entityName, propertyData) in entity {
-                        if let properties = propertyData as? StickyDataNode {
-                            stickySchemaData.append(StickySchemaData(action: action, entity: entityName, element: properties))
-                        } else if action == .renameEntity {
-                            stickySchemaData.append(StickySchemaData(action: action, entity: entityName, element: entity))
-                        } else {
-                            return .error("Properties for action \"\(actionName)\" and entity \"\(entityName)\" are malformed")
+                        if let properties = propertyData as? StickyDataNode<Key>, let entityName = entityName as? String {
+                            parseKeys(for: properties, nodes: [], path: []).forEach {
+                                stickySchemaData.append(StickySchemaData(action: action, entity: entityName, node: $0))
+                            }
+                        } else if action == .renameEntity, let entityName = entityName as? String {
+                            let node: Node<Key> = Node(path: [], key: entityName, value: propertyData) as! Node<Key>
+                            stickySchemaData.append(StickySchemaData<Key>(action: action, entity: entityName, node: node))
                         }
                     }
                 } else {
@@ -151,15 +205,6 @@ extension StickySchemaUpdater {
         }
         return .success(stickySchemaData)
     }
-    
-//    private func processUpdateMethod(for action: StickySchemaAction) -> ([String: Any]) -> SchemaUpdateResult {
-//        switch action {
-//        case .renameEntity: return processRenameEntity
-//        case .newProperty: return processNewProperty
-//        case .renameProperty: return processRenameProperty
-//        case .removeProperty: return processRemoveProperty
-//        }
-//    }
     
     private func increment(to version: Int) {
         Sticky.shared.changeSchemaVersion(to: version)
@@ -185,15 +230,47 @@ extension StickySchemaUpdater {
         }
     }
     
-    private func dictionary(from json: JSON) -> SchemaUpdateResult<StickyDataNode> {
-        guard let dict = json as? StickyDataNode else {
+    private func dictionary(from json: JSON) -> SchemaUpdateResult<StickyDataNode<String>> {
+        guard let dict = json as? [String: Any] else {
             return .error("Can not parse JSON file")
         }
         return .success(dict)
     }
     
-    func performOperation<Key: Hashable>(on dictionary: [Key: Any], at path: [Key], with operation: ([Key: Any]) -> [Key: Any]) -> [Key: Any] {
+    // Method to parse schema properties returning all key/values
+    // with respective paths. Output will be used later to traverse
+    // stored json files and perform change operations
+    func parseKeys<Key: Hashable>(for dict: [Key: Any], nodes: [Node<Key>], path: [Key]) -> [Node<Key>] {
+        let availableKeys = Array(dict.keys)
+        var result = nodes
+        var path = path
         
+        for key in availableKeys {
+            if let childNode = dict[key] {
+                // Drop invalid keys from path
+                if let last = path.last, dict[last] != nil {
+                    _ = path.popLast()
+                }
+                // Check if children are nodes
+                if let parseable = childNode as? [Key: Any] {
+                    // add key to path and recurse
+                    path.append(key)
+                    result = parseKeys(for: parseable, nodes: result, path: path)
+                } else {
+                    // create result node from key/value and path
+                    result.append(Node(path: path, key: key, value: childNode))
+                }
+            }
+        }
+        return result
+    }
+    
+    // Takes a dictionary, keypath (array), and operation
+    // Searches dictionary for given keypath, then performs operation
+    // on that node, returning an updated node to replace existing.
+    // Will be used to update Sticky json files as
+    // data "schema" changes are required
+    func performOperation<Key: Hashable>(on dictionary: [Key: Any], at path: [Key], with operation: ([Key: Any]) -> [Key: Any]) -> [Key: Any] {
         var result = dictionary
         
         if path.isEmpty { return operation(result) }
@@ -236,7 +313,7 @@ extension StickySchemaUpdater {
         }
     }
     
-    func removeKeys<Key: Hashable>(for keys: [Key]) -> ([Key: Any]) -> [Key: Any] {
+    func removeKeys<Key: Hashable>(_ keys: [Key]) -> ([Key: Any]) -> [Key: Any] {
         return { dict in
             var result = dict
             for key in keys {
@@ -254,50 +331,50 @@ extension StickySchemaUpdater {
         }
     }
     
-    func applyAction(_ schema: StickyDataNode, with stored: StickyDataNode, apply action: StickySchemaAction) -> SchemaUpdateResult<StickyDataNode> {
-        var result = stored
-        // Loop through properties for update action on entity
-        for schemaProperty in schema {
-            if let storedProperty = stored[schemaProperty.key] {
-                if let nestedSchemaProperty = schemaProperty.value as? StickyDataNode, let storedProperty = storedProperty as? StickyDataNode {
-                    _ = applyAction(nestedSchemaProperty, with: storedProperty, apply: action)
-                } else {
-                    // No nested property in schema
-                    switch action {
-                    case .renameProperty:
-                        if let newName = schemaProperty.value as? String, let property = stored[schemaProperty.key] {
-                            result.removeValue(forKey: schemaProperty.key)
-                            result.updateValue(property, forKey: newName)
-                            return .success(result)
-                        } else {
-                            return .error("Could not rename property")
-                        }
-                    case .removeProperty:
-                        if let removeList = schemaProperty.value as? [String], var storedProperty = storedProperty as? StickyDataNode {
-                            for itemToRemove in removeList {
-                                if storedProperty.removeValue(forKey: itemToRemove) == nil {
-                                    return .error("Property to remove does not exist")
-                                }
-                                result.updateValue(storedProperty, forKey: schemaProperty.key)
-                            }
-                            return .success(result)
-                        }
-                    default:
-                        return .error("Could not apply update")
-                    }
-                }
-            } else {
-                // Property doesn't exist in stored
-                if action == .newProperty {
-                    result.updateValue(schemaProperty.value, forKey: schemaProperty.key)
-                    return .success(result)
-                } else {
-                    return .error("No new property available")
-                }
-            }
-        }
-        return .success(result)
-    }
+//    func applyAction(_ schema: StickyDataNode, with stored: StickyDataNode, apply action: StickySchemaAction) -> SchemaUpdateResult<StickyDataNode> {
+//        var result = stored
+//        // Loop through properties for update action on entity
+//        for schemaProperty in schema {
+//            if let storedProperty = stored[schemaProperty.key] {
+//                if let nestedSchemaProperty = schemaProperty.value as? StickyDataNode, let storedProperty = storedProperty as? StickyDataNode {
+//                    _ = applyAction(nestedSchemaProperty, with: storedProperty, apply: action)
+//                } else {
+//                    // No nested property in schema
+//                    switch action {
+//                    case .renameProperty:
+//                        if let newName = schemaProperty.value as? String, let property = stored[schemaProperty.key] {
+//                            result.removeValue(forKey: schemaProperty.key)
+//                            result.updateValue(property, forKey: newName)
+//                            return .success(result)
+//                        } else {
+//                            return .error("Could not rename property")
+//                        }
+//                    case .removeProperty:
+//                        if let removeList = schemaProperty.value as? [String], var storedProperty = storedProperty as? StickyDataNode {
+//                            for itemToRemove in removeList {
+//                                if storedProperty.removeValue(forKey: itemToRemove) == nil {
+//                                    return .error("Property to remove does not exist")
+//                                }
+//                                result.updateValue(storedProperty, forKey: schemaProperty.key)
+//                            }
+//                            return .success(result)
+//                        }
+//                    default:
+//                        return .error("Could not apply update")
+//                    }
+//                }
+//            } else {
+//                // Property doesn't exist in stored
+//                if action == .newProperty {
+//                    result.updateValue(schemaProperty.value, forKey: schemaProperty.key)
+//                    return .success(result)
+//                } else {
+//                    return .error("No new property available")
+//                }
+//            }
+//        }
+//        return .success(result)
+//    }
 }
 
 // MARK: Process action methods
