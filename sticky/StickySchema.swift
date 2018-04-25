@@ -192,6 +192,68 @@ extension StickySchemaUpdater {
         return .success(dict)
     }
     
+    func performOperation<Key: Hashable>(on dictionary: [Key: Any], at path: [Key], with operation: ([Key: Any]) -> [Key: Any]) -> [Key: Any] {
+        
+        var result = dictionary
+        
+        if path.isEmpty { return operation(result) }
+        
+        var queue: [[Key: Any]] = []
+        queue.append(result)
+        
+        // Traverse dictionary path and perform operation on node
+        for key in path {
+            if var currentNode = queue.last {
+                if let nestedNode = currentNode[key] as? [Key: Any] {
+                    let updatedNode = operation(nestedNode)
+                    queue.append(updatedNode)
+                }
+            }
+        }
+        
+        // Build up result dictionary with updated values
+        if var last = queue.popLast() {
+            for key in path.reversed() {
+                if var node = queue.popLast() {
+                    node.updateValue(last, forKey: key)
+                    last = node
+                }
+            }
+            result = last
+        }
+        
+        return result
+    }
+    
+    func renameKey<Key: Hashable>(from oldKey: Key, to newKey: Key) -> ([Key: Any]) -> [Key: Any] {
+        return { dict in
+            var result = dict
+            if let value = dict[oldKey] {
+                result.removeValue(forKey: oldKey)
+                result.updateValue(value, forKey: newKey)
+            }
+            return result
+        }
+    }
+    
+    func removeKeys<Key: Hashable>(for keys: [Key]) -> ([Key: Any]) -> [Key: Any] {
+        return { dict in
+            var result = dict
+            for key in keys {
+                result.removeValue(forKey: key)
+            }
+            return result
+        }
+    }
+    
+    func newNode<Key: Hashable>(_ node: Any, for key: Key) -> ([Key: Any]) -> [Key: Any] {
+        return { dict in
+            var result = dict
+            result.updateValue(node, forKey: key)
+            return result
+        }
+    }
+    
     func applyAction(_ schema: StickyDataNode, with stored: StickyDataNode, apply action: StickySchemaAction) -> SchemaUpdateResult<StickyDataNode> {
         var result = stored
         // Loop through properties for update action on entity
@@ -211,11 +273,12 @@ extension StickySchemaUpdater {
                             return .error("Could not rename property")
                         }
                     case .removeProperty:
-                        if let removeList = schemaProperty.value as? [String] {
+                        if let removeList = schemaProperty.value as? [String], var storedProperty = storedProperty as? StickyDataNode {
                             for itemToRemove in removeList {
-                                if result.removeValue(forKey: itemToRemove) == nil {
+                                if storedProperty.removeValue(forKey: itemToRemove) == nil {
                                     return .error("Property to remove does not exist")
                                 }
+                                result.updateValue(storedProperty, forKey: schemaProperty.key)
                             }
                             return .success(result)
                         }
