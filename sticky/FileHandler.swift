@@ -50,7 +50,7 @@ internal class FileHandler {
             return nil
         }
     }
-    
+ 
     @discardableResult internal static func write(data: Data, to path: String) -> FileResult {
         do {
             try data.write(to: URL(fileURLWithPath: path))
