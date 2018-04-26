@@ -1,5 +1,7 @@
 import Foundation
 
+fileprivate let stickyDataDumpLogQueue = "queue.sticky.log"
+
 public extension Stickable {
     
     public static func read() -> [Self]? {
@@ -20,7 +22,7 @@ public extension Stickable {
     public static func dumpDataStoreToLog() {
         if Sticky.shared.configuration.logging {
             if Sticky.shared.configuration.async {
-                let queue = DispatchQueue(label: "com.sticky.log", qos: .background)
+                let queue = DispatchQueue(label: stickyDataDumpLogQueue, qos: .background)
                 queue.async {
                     guard let data = fileData else { return }
                     stickyLog("\(entityName): \(String(bytes: data, encoding: .utf8) ?? "")")
@@ -29,7 +31,7 @@ public extension Stickable {
                 stickyLog(debugDescription)
             }
         } else {
-            print("\(entityName).\(#function) - Please enable logging in StickyConfiguration to see stored data")
+            stickyLog("\(entityName).\(#function) - Please enable logging in StickyConfiguration to see stored data")
         }
     }
     
@@ -58,7 +60,7 @@ public extension Stickable {
             var errorMessage = "ERROR: \(entityName).\(#function) \(error.localizedDescription) "
             errorMessage += handleDecodeError(error) ?? ""
             errorMessage += debugDescription
-            stickyLog(errorMessage)
+            stickyLog(errorMessage, logAction: .error)
         }
         
         // Write to cache if data is returned and cache is empty
@@ -74,7 +76,7 @@ public extension Stickable {
     }
     
     public static var filePath: String {
-        return FileHandler.fullPath(for: Self.self)
+        return FileHandler.url(for: Self.entityName).path
     }
     
     private static func handleDecodeError(_ error: Error) -> String? {

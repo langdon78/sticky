@@ -1,5 +1,10 @@
 import Foundation
 
+internal enum FileResult {
+    case success
+    case error(Error)
+}
+
 internal class FileHandler {
     private static var localDirectory: URL {
         return Sticky.shared.configuration.localDirectory
@@ -9,18 +14,29 @@ internal class FileHandler {
         return Sticky.shared.configuration.fileExtensionName
     }
     
-    internal static func fullPath(for persistantObject: Stickable.Type) -> String {
+    internal static func url(for persistantObjectName: String) -> URL {
         var configuredUrl = FileHandler.localDirectory
-        let fileName = String(describing: persistantObject)
+        let fileName = persistantObjectName
         let fileExtension = FileHandler.fileExtensionName
         configuredUrl.appendPathComponent(fileName + fileExtension)
-        let path = configuredUrl.path
-        return path
+        return configuredUrl
     }
     
     internal static func fileExists(at path: String) -> Bool {
         let fileManager = FileManager.default
         return fileManager.fileExists(atPath: path)
+    }
+    
+    internal static func renameFile(from oldName: String, to newName: String) -> FileResult {
+        let originPath = url(for: oldName)
+        let destinationPath = url(for: newName)
+        do {
+            try FileManager.default.moveItem(at: originPath, to: destinationPath)
+            return .success
+        }
+        catch {
+            return .error(error)
+        }
     }
     
     internal static func read(from path: String) -> Data? {
@@ -30,17 +46,18 @@ internal class FileHandler {
             stickyLog("Read from file")
             return try Data(contentsOf: url)
         } catch {
-            stickyLog("ERROR: \(error.localizedDescription)")
+            stickyLog("ERROR: \(error.localizedDescription)", logAction: .error)
             return nil
         }
     }
-    
-    internal static func write(data: Data, to path: String) {
+ 
+    @discardableResult internal static func write(data: Data, to path: String) -> FileResult {
         do {
             try data.write(to: URL(fileURLWithPath: path))
             stickyLog("File updated")
+            return .success
         } catch let error {
-            print(error.localizedDescription)
+            return .error(error)
         }
     }
     
@@ -55,7 +72,7 @@ internal class FileHandler {
                 }
             }
         } catch {
-            print(error.localizedDescription)
+            stickyLog(error.localizedDescription, logAction: .error)
         }
     }
 }

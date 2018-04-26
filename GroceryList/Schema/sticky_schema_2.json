@@ -1,0 +1,16 @@
+{
+    "renameProperty": {
+        "FoodItem": {
+            "amount": "quantity"
+        }
+    },
+    "newProperty": {
+        "FoodItem": {
+            "store": {
+                "id": 1,
+                "name": "Target",
+                "city": "Bloomington"
+            }
+        }
+    }
+}

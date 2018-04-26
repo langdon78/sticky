@@ -9,7 +9,7 @@ class GroceryListViewController: UIViewController {
     @IBOutlet private weak var tableView: UITableView!
     @IBOutlet private weak var tfGroceryItem: UITextField!
     
-    private var groceryList: [GroceryItem] = []
+    private var groceryList: [FoodItem] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,29 +17,29 @@ class GroceryListViewController: UIViewController {
         
         // Subscribe to notifications for GroceryItem data store
         notificationCenters.forEach { [unowned self] notificationCenter in
-            self.registerForNotifications(for: notificationCenter, selector: #selector(outputToConsole(notification:)), name: GroceryItem.notificationName)
+            self.registerForNotifications(for: notificationCenter, selector: #selector(outputToConsole(notification:)), name: FoodItem.notificationName)
         }
     }
     
     deinit {
         notificationCenters.forEach { notificationCenter in
-            deregisterForNotifications(for: notificationCenter, name: GroceryItem.notificationName)
+            deregisterForNotifications(for: notificationCenter, name: FoodItem.notificationName)
         }
     }
     
     @IBAction func addButton_pressed(_ sender: UIButton) {
         guard let groceryItemEntry = tfGroceryItem.text, !groceryItemEntry.isEmpty else { return }
-        let groceryItem = GroceryItem(itemName: groceryItemEntry)
+        let groceryItem = FoodItem(itemName: groceryItemEntry)
         tfGroceryItem.text = nil
         saveAndUpdateList(with: groceryItem)
     }
     
     private func loadGroceryListFromStore() {
-        groceryList = GroceryItem.storedData
+        groceryList = FoodItem.storedData
         tableView.reloadData()
     }
     
-    private func saveAndUpdateList(with groceryItem: GroceryItem) {
+    private func saveAndUpdateList(with groceryItem: FoodItem) {
         groceryItem.saveToStore()
         loadGroceryListFromStore()
     }
@@ -60,8 +60,8 @@ class GroceryListViewController: UIViewController {
     @objc private func outputToConsole(notification: NSNotification) {
         guard
             let first = notification.userInfo?.first,
-            let key = first.key.base as? Action<GroceryItem>,
-            let value = first.value as? [GroceryItem],
+            let key = first.key.base as? Action<FoodItem>,
+            let value = first.value as? [FoodItem],
             let item = value.first
             else { return }
         let newValue = value.last
@@ -71,7 +71,7 @@ class GroceryListViewController: UIViewController {
         case .insert:
             stickyMessage += "Inserted \(item.itemName) into \(type(of: item)) data store"
         case .update:
-            stickyMessage += "\(item.itemName) amount updated from \(String(describing: item.amount) ) to \(String(describing: newValue!.amount)) in \(type(of: item)) data store"
+            stickyMessage += "\(item.itemName) amount updated from \(String(describing: item.quantity) ) to \(String(describing: newValue!.quantity)) in \(type(of: item)) data store"
         case .create:
             stickyMessage += "Created new data set for \(type(of: item)) and inserted \(item.itemName)"
         case .delete:

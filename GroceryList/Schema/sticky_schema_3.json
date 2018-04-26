@@ -1,0 +1,16 @@
+{
+    "renameProperty": {
+        "FoodItem": {
+            "store": {
+                "city": "town"
+            }
+        }
+    },
+    "removeProperty": {
+        "FoodItem": {
+            "store": [
+                "name"
+            ]
+        }
+    }
+}
