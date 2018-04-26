@@ -197,7 +197,7 @@ extension StickySchemaUpdater {
     }
     
     private func parseSchema<Key: Hashable>(from schema: StickyDataMap<Key>) -> [StickySchemaData<Key>]? {
-        let nodes = parseKeys(for: schema, nodes: [], path: [])
+        let nodes = navigationList(for: schema)
         var returnSchemaData: [StickySchemaData<Key>] = []
         for node in nodes {
             guard let schemaData = schemaData(for: node) else { return nil }
@@ -281,7 +281,7 @@ extension StickySchemaUpdater {
     // Method to parse schema properties returning all key/values
     // with respective paths. Output will be used later to traverse
     // stored json files and perform change operations
-    func parseKeys<Key: Hashable>(for dict: [Key: Any], nodes: [Node<Key>], path: [Key]) -> [Node<Key>] {
+    func navigationList<Key: Hashable>(for dict: [Key: Any], nodes: [Node<Key>] = [], path: [Key] = []) -> [Node<Key>] {
         let availableKeys = Array(dict.keys)
         var result = nodes
         var path = path
@@ -296,7 +296,7 @@ extension StickySchemaUpdater {
                 if let parseable = childNode as? [Key: Any] {
                     // add key to path and recurse
                     path.append(key)
-                    result = parseKeys(for: parseable, nodes: result, path: path)
+                    result = navigationList(for: parseable, nodes: result, path: path)
                 } else {
                     // create result node from key/value and path
                     result.append(Node(path: path, key: key, value: childNode))
