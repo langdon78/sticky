@@ -3,7 +3,7 @@ import Foundation
 typealias JSON = Any
 
 internal typealias StickyEntityCollection = [[String: Any]]
-internal typealias StickyDataNode<Key: Hashable> = [Key: Any]
+internal typealias StickyDataMap<Key: Hashable> = [Key: Any]
 internal typealias StickyEntity = String
 
 internal enum SchemaUpdateResult<StickyDataElement> {
@@ -108,7 +108,8 @@ extension StickySchemaUpdater {
         guard let dictionaryData = processUpdaterResult(dictionary(from: jsonData)) else { return }
         
         stickyLog("Looking for actions to process...")
-        guard let schemaData = processUpdaterResult(stickySchemaData(for: dictionaryData)) else { return }
+//        guard let schemaData = processUpdaterResult(stickySchemaData(for: dictionaryData)) else { return }
+        guard let schemaData = parseSchema(from: dictionaryData) else { return }
         
         var dataStore: [StickyEntity: StickyEntityCollection] = [:]
         print("here: \(schemaData)")
@@ -179,31 +180,73 @@ extension StickySchemaUpdater {
         }
     }
     
-    private func stickySchemaData<Key: Hashable>(for stickyDataNode: StickyDataNode<Key>) -> SchemaUpdateResult<[StickySchemaData<Key>]> {
-        print(stickyDataNode)
-        var stickySchemaData: [StickySchemaData<Key>] = []
-        for (actionName, entityData) in stickyDataNode {
-            if let action = StickySchemaAction(actionName) {
-                print(action)
-                if let entity = entityData as? StickyDataNode<Key> {
-                    for (entityName, propertyData) in entity {
-                        if let properties = propertyData as? StickyDataNode<Key>, let entityName = entityName as? String {
-                            parseKeys(for: properties, nodes: [], path: []).forEach {
-                                stickySchemaData.append(StickySchemaData(action: action, entity: entityName, node: $0))
-                            }
-                        } else if action == .renameEntity, let entityName = entityName as? String {
-                            let node: Node<Key> = Node(path: [], key: entityName, value: propertyData) as! Node<Key>
-                            stickySchemaData.append(StickySchemaData<Key>(action: action, entity: entityName, node: node))
-                        }
-                    }
-                } else {
-                    return .error("Entity data for action \"\(actionName)\" is malformed")
-                }
-            } else {
-                return .error("\"\(actionName)\" doesn't match any available actions")
-            }
+//    private func stickySchemaData<Key: Hashable>(for stickyDataNode: StickyDataMap<Key>) -> SchemaUpdateResult<[StickySchemaData<Key>]> {
+//        print(stickyDataNode)
+//        var stickySchemaData: [StickySchemaData<Key>] = []
+//        for (actionName, entityData) in stickyDataNode {
+//            if let action = StickySchemaAction(actionName) {
+//                print(action)
+//                if let entity = entityData as? StickyDataMap<Key> {
+//                    for (entityName, propertyData) in entity {
+//                        if let properties = propertyData as? StickyDataMap<Key>, let entityName = entityName as? String {
+//                            parseKeys(for: properties, nodes: [], path: []).forEach {
+//                                stickySchemaData.append(StickySchemaData(action: action, entity: entityName, node: $0))
+//                            }
+//                        } else if action == .renameEntity, let entityName = entityName as? String {
+//                            let node: Node<Key> = Node(path: [], key: entityName, value: propertyData) as! Node<Key>
+//                            stickySchemaData.append(StickySchemaData<Key>(action: action, entity: entityName, node: node))
+//                        }
+//                    }
+//                } else {
+//                    return .error("Entity data for action \"\(actionName)\" is malformed")
+//                }
+//            } else {
+//                return .error("\"\(actionName)\" doesn't match any available actions")
+//            }
+//        }
+//        return .success(stickySchemaData)
+//    }
+    
+    private func parseSchema<Key: Hashable>(from schema: StickyDataMap<Key>) -> [StickySchemaData<Key>]? {
+        let nodes = parseKeys(for: schema, nodes: [], path: [])
+        return nodes.compactMap { schemaData(for: $0) }
+    }
+    
+    private func schemaData<Key: Hashable>(for node: Node<Key>) -> StickySchemaData<Key>? {
+        var path = node.path
+        
+        guard
+            let actionName = parseFirst(from: &path),
+            let action = StickySchemaAction(actionName) else {
+                stickyLog("Invalid action", logAction: .error)
+                return nil
         }
-        return .success(stickySchemaData)
+        
+        guard let entityName = entityName(for: action, nodeKey: node.key, path: &path) else {
+            stickyLog("Unable to parse entity name for action \"\(action.rawValue)\"")
+            return nil
+        }
+        
+        let returnNode = Node(path: path, key: node.key, value: node.value)
+        return StickySchemaData(action: action, entity: entityName, node: returnNode)
+    }
+    
+    private func entityName<Key: Hashable>(for action: StickySchemaAction<Key>, nodeKey: Key, path: inout [Key]) -> String? {
+        if action == .renameEntity, let keyEntityName = nodeKey as? String {
+            return keyEntityName
+        } else if let pathEntityName = parseFirst(from: &path) as? String {
+            return pathEntityName
+        } else {
+            return nil
+        }
+    }
+    
+    private func parseFirst<Key: Hashable>(from list: inout [Key]) -> Key? {
+        guard !list.isEmpty else {
+            stickyLog("Malformed or empty schema file", logAction: .error)
+            return nil
+        }
+        return list.removeFirst()
     }
     
     private func increment(to version: Int) {
@@ -230,7 +273,7 @@ extension StickySchemaUpdater {
         }
     }
     
-    private func dictionary(from json: JSON) -> SchemaUpdateResult<StickyDataNode<String>> {
+    private func dictionary(from json: JSON) -> SchemaUpdateResult<StickyDataMap<String>> {
         guard let dict = json as? [String: Any] else {
             return .error("Can not parse JSON file")
         }
