@@ -1,10 +1,5 @@
 import Foundation
 
-internal enum FileResult {
-    case success
-    case error(Error)
-}
-
 internal class FileHandler {
     private static var localDirectory: URL {
         return Sticky.shared.configuration.localDirectory
@@ -27,7 +22,7 @@ internal class FileHandler {
         return fileManager.fileExists(atPath: path)
     }
     
-    internal static func renameFile(from oldName: String, to newName: String) -> FileResult {
+    internal static func renameFile(from oldName: String, to newName: String) -> StickyResult {
         let originPath = url(for: oldName)
         let destinationPath = url(for: newName)
         do {
@@ -43,7 +38,7 @@ internal class FileHandler {
         guard fileExists(at: path) else { return nil }
         let url = URL(fileURLWithPath: path)
         do {
-            stickyLog("Read from file")
+            stickyLog("Read from file \(url.lastPathComponent)")
             return try Data(contentsOf: url)
         } catch {
             stickyLog("ERROR: \(error.localizedDescription)", logAction: .error)
@@ -51,7 +46,7 @@ internal class FileHandler {
         }
     }
  
-    @discardableResult internal static func write(data: Data, to path: String) -> FileResult {
+    @discardableResult internal static func write(data: Data, to path: String) -> StickyResult {
         do {
             try data.write(to: URL(fileURLWithPath: path))
             stickyLog("File updated")
@@ -73,6 +68,41 @@ internal class FileHandler {
             }
         } catch {
             stickyLog(error.localizedDescription, logAction: .error)
+        }
+    }
+}
+
+// MARK: - JSON Handling
+
+extension FileHandler {
+    internal static func readJsonFile<Key: Hashable>(for entityName: StickyEntityName) -> StickyStoredEntity<Key>? {
+        let filePath = FileHandler.url(for: entityName).path
+        guard let data = FileHandler.read(from: filePath) else {
+            stickyLog("ERROR: Could not read JSON file data for \(filePath)", logAction: .error)
+            return nil
+        }
+        do {
+            let json = try JSONSerialization.jsonObject(with: data, options: [])
+            guard let result = json as? StickyStoredEntity<Key> else {
+                stickyLog("ERROR: Can not parse JSON file \(filePath)", logAction: .error)
+                return nil
+            }
+            return result
+        }
+        catch {
+            stickyLog(error.localizedDescription)
+        }
+        return nil
+    }
+    
+    internal static func writeJsonFile(for entity: StickyStoredEntity<String>, to entityName: StickyEntityName) -> StickyResult {
+        let filePath = FileHandler.url(for: entityName).path
+        do {
+            let newData = try JSONSerialization.data(withJSONObject: entity, options: [])
+            return FileHandler.write(data: newData, to: filePath)
+        }
+        catch {
+            return .error(error)
         }
     }
 }

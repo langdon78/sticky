@@ -26,7 +26,7 @@ public extension StickySchemaUpdateable {
             .last?.key ?? 0
     }
     
-    static func processUpdates() {
+    public static func processUpdates() {
         if StickySchemaUpdater.checkUpdateNeeded(for: maxVersion) {
             StickySchemaUpdater.processUpdates(for: schemaFiles)
         }
