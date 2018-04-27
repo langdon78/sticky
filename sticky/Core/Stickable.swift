@@ -20,7 +20,7 @@ public extension Stickable {
     }
     
     public static func dumpDataStoreToLog() {
-        if Sticky.shared.configuration.logging {
+        if Sticky.shared.configuration.logStyle == .verbose {
             if Sticky.shared.configuration.async {
                 let queue = DispatchQueue(label: stickyDataDumpLogQueue, qos: .background)
                 queue.async {

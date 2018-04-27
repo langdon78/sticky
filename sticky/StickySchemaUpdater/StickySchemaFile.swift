@@ -12,7 +12,7 @@ internal struct StickySchemaFile {
     public func toStickySchemaMap() -> StickySchemaMap<String>? {
         guard let data = schemaData() else { return nil }
         guard let schemaMap = json(from: data) as? StickySchemaMap<String> else {
-            stickyLog("Can not parse JSON file", logAction: .error)
+            StickyError.invalidJson.outputToLog(schemaLog)
             return nil
         }
         return schemaMap
@@ -24,7 +24,7 @@ internal struct StickySchemaFile {
             return data
         }
         catch {
-            stickyLog("Unable to process schema file \(fileUrl)", logAction: .error)
+            StickyError.unableToProcessSchemaFile(fileUrl.absoluteString).outputToLog(schemaLog)
             return nil
         }
     }
@@ -35,7 +35,7 @@ internal struct StickySchemaFile {
             return json
         }
         catch {
-            stickyLog("Unable to parse json for \(fileUrl)", logAction: .error)
+            StickyError.unableToProcessSchemaFile(fileUrl.absoluteString).outputToLog(schemaLog)
             return nil
         }
     }

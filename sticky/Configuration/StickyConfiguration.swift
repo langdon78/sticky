@@ -8,7 +8,7 @@ public struct StickyConfiguration {
     public let fileExtensionName: String
     public let clearDirectory: Bool
     public let async: Bool
-    public let logging: Bool
+    public let logStyle: StickyLogStyle
     public let rollbackToSchemaVersion: Int?
     
     public init(
@@ -23,7 +23,7 @@ public struct StickyConfiguration {
         fileExtensionName: String = defaultFileExtension,
         clearDirectory: Bool = false,
         async: Bool = false,
-        logging: Bool = false,
+        logStyle: StickyLogStyle = .none,
         schemaVersion: Int = 1,
         rollbackToSchemaVersion: Int? = nil
         ) {
@@ -32,7 +32,7 @@ public struct StickyConfiguration {
         self.fileExtensionName = fileExtensionName
         self.clearDirectory = clearDirectory
         self.async = async
-        self.logging = logging
+        self.logStyle = logStyle
         self.rollbackToSchemaVersion = rollbackToSchemaVersion
     }
 }

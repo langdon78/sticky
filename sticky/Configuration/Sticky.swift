@@ -64,7 +64,7 @@ public enum StickyConfigurationSettings {
                 fileExtensionName: configuration.fileExtensionName,
                 clearDirectory: configuration.clearDirectory,
                 async: configuration.async,
-                logging: configuration.logging,
+                logStyle: configuration.logStyle,
                 rollbackToSchemaVersion: configuration.rollbackToSchemaVersion
             )
         }
