@@ -1,12 +1,10 @@
-//: Playground - noun: a place where people can play
-
-import UIKit
+import Foundation
 import Sticky
 import PlaygroundSupport
 
 PlaygroundPage.current.needsIndefiniteExecution = true
 
-let stickyConfig = StickyConfiguration(preloadCache: false, clearDirectory: false, async: false, logging: true)
+let stickyConfig = StickyConfiguration(preloadCache: false, clearDirectory: false, async: false, logStyle: .verbose)
 Sticky.configure(with: .custom(stickyConfig))
 
 enum Rating: Int {
