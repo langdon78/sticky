@@ -23,13 +23,13 @@ internal enum StickySchemaActionType<Key: Hashable>: String {
     }
 }
 
-fileprivate struct StickySchemaAction<Key: Hashable> {
+internal struct StickySchemaAction<Key: Hashable> {
     var actionType: StickySchemaActionType<Key>
     var entityName: StickyEntityName
     var node: Node<Key>
 }
 
-fileprivate struct Node<Key: Hashable> {
+internal struct Node<Key: Hashable> {
     var path: [Key]
     var key: Key
     var value: Any
@@ -95,7 +95,7 @@ extension StickySchemaUpdater {
 
 extension StickySchemaUpdater {
     
-    private func processSchemaActions<Key: Hashable>(for schemaActions: [StickySchemaAction<Key>]) -> StickyResult {
+    internal func processSchemaActions<Key: Hashable>(for schemaActions: [StickySchemaAction<Key>]) -> StickyResult {
         var memoryCache: [StickyEntityName: StickyStoredEntity<Key>] = [:]
         
         for action in schemaActions {
@@ -125,7 +125,7 @@ extension StickySchemaUpdater {
         return .success
     }
     
-    private func processSchemaAction<Key: Hashable>(for data: StickySchemaAction<Key>,
+    internal func processSchemaAction<Key: Hashable>(for data: StickySchemaAction<Key>,
                                                     on storedEntity: inout StickyStoredEntity<Key>) -> StickyResult {
         if data.actionType == .renameEntity,
             let oldName = data.node.key as? String,
@@ -186,7 +186,7 @@ extension StickySchemaUpdater {
         }
     }
     
-    private func schemaActions<Key: Hashable>(from schema: StickySchemaMap<Key>) -> [StickySchemaAction<Key>]? {
+    internal func schemaActions<Key: Hashable>(from schema: StickySchemaMap<Key>) -> [StickySchemaAction<Key>]? {
         let nodes = navigationList(for: schema)
         var templateList: [StickySchemaAction<Key>] = []
         for node in nodes {
@@ -308,12 +308,12 @@ extension StickySchemaUpdater {
 
 // MARK: Action methods
 
-extension StickySchemaUpdater {
-    private func renameEntity(from oldName: String, to newName: String) -> StickyResult {
+internal extension StickySchemaUpdater {
+    func renameEntity(from oldName: String, to newName: String) -> StickyResult {
         return FileHandler.renameFile(from: oldName, to: newName)
     }
     
-    private func renameKey<Key: Hashable>(from oldKey: Key, to newKey: Key) -> ([Key: Any]) -> [Key: Any] {
+    func renameKey<Key: Hashable>(from oldKey: Key, to newKey: Key) -> ([Key: Any]) -> [Key: Any] {
         return { dict in
             var result = dict
             if let value = dict[oldKey] {
@@ -324,7 +324,7 @@ extension StickySchemaUpdater {
         }
     }
     
-    private func removeKeys<Key: Hashable>(_ keys: [Key]) -> ([Key: Any]) -> [Key: Any] {
+    func removeKeys<Key: Hashable>(_ keys: [Key]) -> ([Key: Any]) -> [Key: Any] {
         return { dict in
             var result = dict
             for key in keys {
@@ -334,7 +334,7 @@ extension StickySchemaUpdater {
         }
     }
     
-    private func newNode<Key: Hashable>(_ node: Any, for key: Key) -> ([Key: Any]) -> [Key: Any] {
+    func newNode<Key: Hashable>(_ node: Any, for key: Key) -> ([Key: Any]) -> [Key: Any] {
         return { dict in
             var result = dict
             result.updateValue(node, forKey: key)
