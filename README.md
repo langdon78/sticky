@@ -131,3 +131,21 @@ Of course, you can grab the directory and remove the `.json` files yourself.
 print(Sticky.shared.configuration.localDirectory)
 // /var/folders/63/hmdwgb3148v4_xzv_jff_ztr0000gn/T/com.apple.dt.Xcode.pg/containers/com.apple.dt.playground.stub.iOS_Simulator.stickyExample-D9C1FB9E-545E-459A-9B57-8191A9B10FC4/Documents/
 ```
+
+# Installation
+### Requirements
+- iOS 10.0+ | macOS 10.12+ | tvOS 11.0+ | watchOS 4.0+
+- Xcode 9.0+
+### Integration
+#### CocoaPods (iOS 10+, OS X 10.12+)
+
+You can use [CocoaPods](http://cocoapods.org/) to install `Sticky` by adding it to your `Podfile`:
+
+```ruby
+platform :ios, '10.0'
+use_frameworks!
+
+target 'MyApp' do
+    pod 'Sticky'
+end
+```
