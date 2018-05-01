@@ -120,7 +120,7 @@ let stickyConfig = StickyConfiguration(
     preloadCache: false, 
     clearDirectory: true, 
     async: false, 
-    logging: true)
+    logStyle: .verbose)
 
 Sticky.configure(with: .custom(stickyConfig))
 ```
