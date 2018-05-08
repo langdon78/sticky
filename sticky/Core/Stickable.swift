@@ -162,4 +162,13 @@ public extension Stickable where Self: Equatable & StickyKey & StickyPromise {
         Store.save(with: stickyAction)
         return self as StickyPromise
     }
+    
+    public func unstick() {
+        let dataSet = Self.read()
+        stickyLog("\(Self.entityName) removing data \(self)")
+        let index = dataSet?
+            .map({ $0.key })
+            .index(of: self.key)
+        Store.remove(value: self, from: dataSet, at: index)
+    }
 }
