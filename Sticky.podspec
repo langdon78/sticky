@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Sticky'
-  s.version          = '0.0.1'
+  s.version          = '0.1.1'
   s.summary          = 'Use Sticky to quickly persist common Swift objects using the Swift 4 Codable type and local file storage.'
 
 # This description is used to generate tags and improve search results.

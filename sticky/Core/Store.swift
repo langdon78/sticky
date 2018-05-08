@@ -83,7 +83,6 @@ internal class Store {
         } else {
             stickyLog("\(value) could not be found")
         }
-        
     }
     
     internal static func save<StickyElement: StickyComparable>(with action: Action<StickyElement>) {
