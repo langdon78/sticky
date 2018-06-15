@@ -11,7 +11,7 @@ public struct StickyConfiguration {
     public let async: Bool
     public let logStyle: StickyLogStyle
     public let rollbackToSchemaVersion: Int?
-    public static var defaultDirectory: URL? {
+    public static var defaultDirectory: URL! {
         do {
             // Using /Library/Application Support/ for app data files
             // backed up by iCloud
@@ -38,7 +38,7 @@ public struct StickyConfiguration {
     }
     
     public init(
-        localDirectory: URL = defaultDirectory!,
+        localDirectory: URL = defaultDirectory,
         preloadCache: Bool = true,
         fileExtensionName: String = defaultFileExtension,
         clearDirectory: Bool = false,
