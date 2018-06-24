@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "container:/Users/jameslangdon/Documents/Xcode Projects/sticky/Sticky.xcodeproj">
+      location = "container:../sticky/Sticky.xcodeproj">
    </FileRef>
 </Workspace>
